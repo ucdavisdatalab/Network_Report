@@ -1,0 +1,151 @@
+---
+title: "Network Report"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+bibliography: ../references.bib
+link-citations: TRUE
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(knitr)
+library(rmdformats)
+library(statnet)
+library(visNetwork)
+
+## Global options
+options(max.print="75")
+opts_chunk$set(echo=TRUE,
+	             cache=TRUE,
+               prompt=FALSE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE)
+opts_knit$set(width=75)
+```
+
+```{r links, echo=FALSE}
+# emojis
+net_url1 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/male-teacher_emoji.png"
+net_url2 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/female-student_emoji.png"
+net_url3 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/female-health-worker_emoji.png"
+net_url4 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/male-scientist_emoji.png"
+
+# examples
+net_url5 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/who_shall_survive.png"
+net_url6 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/neuronet.jpg"
+net_url7 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/chem_graph.jpg"
+net_url8 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/page_rank.jpg"
+net_url9 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/infrastructure_net.jpg"
+net_url10 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/terror_net.png"
+
+# others
+net_url11 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/2mode.png"
+net_url12 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/2_step.png"
+```
+
+Overview
+================================================================================
+
+Welcome! {data-width=400}
+--------------------------------------------------------------------------------
+
+### Welcome!
+
+#### Report Introduction
+
+This report will ingest pre-formatted network data and walk readers through some preliminary network metrics. All of the text in this report is generalized to any network it could render; it is not specific to the data displayed. Because of this, some metrics may not be relevant to a specific data set. Please talk with the DataLab about the outcomes of this report for help with interpretation and applications of these outcomes.
+
+To navigate this report, use the tabs at the top of the page. Each page will walk you through one network metric and it's interpretation. The remainder of this tab will cover some network basics.
+
+#### Network Background
+
+You may be familiar with tabular data; rows and columns containing information. You can see a representation of this data to the right on top. While this is a tidy way to store data, it artificially atomizes or separates many of the things we are interested in as researchers, social or otherwise. Network analysis is a tool to work with *relational* data, a.k.a. information about how entities are connected with each other. For example, the diagram on the bottom right shows the same data as the table above, with the added benefit of showing how these individuals are connected to each other. Hover over the people to reveal the data about them.
+
+Rather than looking only at attributes of specific data points, we are looking at the connections between data. In network analysis, data points are called *nodes* or *vertices*, and the connections between them are called *edges* or *ties*. Vertices can be anything---people, places, words, concepts---they are usually mapped into rows in a data frame. Edges contain any information on how these things connect or are related to each other. These components create a *network* or *graph*, defined as "finite set or sets of actors and the relation or relations defined on them" [@wassermanSocialNetworkAnalysis1994].
+
+Data Types {data-width=600}
+--------------------------------------------------------------------------------
+
+### Example Data Frame
+
+| Person | Name | Age | Widgets |
+|--------------------------------|:-----|:----|:--------|
+| ![](`r net_url1`){width="10%"} | J    | 30  | 1       |
+| ![](`r net_url2`){width="10%"} | Y    | 21  | 3       |
+| ![](`r net_url3`){width="10%"} | G    | 32  | 4       |
+| ![](`r net_url4`){width="10%"} | Z    | 48  | 8       |
+
+### Example Network
+
+```{r echo=FALSE, out.width='100%'}
+nodes = data.frame(id = 1:4, 
+                    shape = "image",
+                    title = c("<p style='color: black;'>Name: J<br>Age: 30<br>Widgets: 1</p>", "<p style='color: black;'>Name: Y<br>Age: 21<br>Widgets: 3</p>", "<p style='color: black;'>Name: G<br>Age: 32<br>Widgets: 4</p>", "<p style='color: black;'>Name: Z<br>Age: 48<br>Widgets: 8</p>"),
+                    image = c(net_url1, net_url2, net_url3, net_url4))
+
+edges = data.frame(from = c(2,4,3,3), to = c(1,2,4,2), label = c("Siblings", "Student", "Friends", "Parent"))
+
+toy_net = visNetwork(nodes, edges, width = "100%") %>% 
+  visNodes(shapeProperties = list(useBorderWithImage = FALSE), size = 50) %>%
+  visEdges(length = 200, scaling = list(min = 400)) %>%
+  visInteraction(zoomView = FALSE) %>%
+  visLayout(randomSeed = 2)
+
+toy_net$sizingPolicy$browser$fill = TRUE
+
+toy_net
+```
+
+Network Metadata
+================================================================================
+
+Explanation Text
+--------------------------------------------------------------------------------
+
+### Network Characteristics
+
+
+
+Network Viewer
+--------------------------------------------------------------------------------
+
+### Base Network
+
+
+add projected or no, directional, weighted edges?
+
+density, centralization
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+References
+================================================================================
+
+### References
+
+
+
+
+
+
