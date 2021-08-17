@@ -14,9 +14,9 @@ library(knitr)
 library(rmdformats)
 library(statnet)
 library(visNetwork)
+library(skimr)
 
 # options
-
 .seed = 1337
 
 # knitr options
@@ -182,10 +182,10 @@ Degree Text {data-width=400}
 #### In This Network
 
 ```{r echo=FALSE}
-hist(nodes$degree, main = "Degree Frequency", xlab = "Total Degree")
+skim_without_charts(nodes$degree) %>% yank("numeric")
 ```
 
-This network has a total of `r nrow(edges)` edges. The network on the right has the nodes scaled such that larger nodes have a higher total degree. The node highlighted in yellow in the right has the highest total degree at `r max(nodes$degree)` (`r (max(nodes$degree)/nrow(edges))*100` of all edges). 
+This network has a total of `r nrow(edges)` edges. The network on the right has the nodes scaled such that larger nodes have a higher total degree. The node highlighted in yellow in the right has the highest total degree at `r max(nodes$degree)` (`r round((max(nodes$degree)/nrow(edges))*100, digits = 2)`% of all edges). 
 
 Network Viewer {data-width=600}
 --------------------------------------------------------------------------------
@@ -206,7 +206,11 @@ visNetwork(degree_df, edges) %>%
   visOptions(highlightNearest = TRUE) %>%
   visLayout(randomSeed = .seed)
 ```
+### Degree Plot
 
+```{r echo=FALSE}
+hist(nodes$degree, main = "Degree Frequency", xlab = "Total Degree")
+```
 
 
 
