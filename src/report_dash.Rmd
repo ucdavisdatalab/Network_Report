@@ -15,10 +15,14 @@ library(rmdformats)
 library(statnet)
 library(visNetwork)
 
-## Global options
+# options
+
+.seed = 1337
+
+# knitr options
 options(max.print="75")
 opts_chunk$set(echo=TRUE,
-	             cache=TRUE,
+	             cache=FALSE,
                prompt=FALSE,
                tidy=TRUE,
                comment=NA,
@@ -27,24 +31,59 @@ opts_chunk$set(echo=TRUE,
 opts_knit$set(width=75)
 ```
 
-```{r links, echo=FALSE}
+```{r data_load, include=FALSE}
+# read in attributes and edgelist
+nodes = read.csv("./data/nodes.csv", header = TRUE, stringsAsFactors = FALSE)
+edges = read.csv("./data/edges.csv", header = TRUE, stringsAsFactors = FALSE)
+
+# make a network
+
+## sort your attributes frame alphabetically. Super important!
+nodes = nodes[order(nodes$id), ]
+## make network!
+rgraph = network(edges, directed = FALSE, matrix.type = "edgelist")
+
+# largest component
+
+## find what nodes are part of the largest component
+rgraph%v%"lc" = component.largest(rgraph)
+## delete those nodes that are not
+### in the network
+rgraph = delete.vertices(rgraph, which(rgraph%v%"lc" == FALSE))
+### in our dataframes
+nodes = nodes[nodes$id %in% as.character(rgraph%v%"vertex.names"),]
+edges = edges[which(edges$to %in% nodes$id | edges$from %in% nodes$id),]
+
+# generate measures
+
+## degree
+rgraph%v%"degree" = degree(rgraph)
+## mean geodesic
+rgraph%v%"mean_distance" = (colSums(geodist(rgraph)$gdist)) / (nrow(as.sociomatrix(rgraph)) - 1)
+## normalized betweenness
+rgraph%v%"norm_betweenness" = betweenness(dat = rgraph, gmode = "graph", rescale = TRUE, cmode = "undirected")
+## eigenvector
+rgraph%v%"evc" = evcent(rgraph, gmode = "graph", rescale = TRUE)
+
+# add back to attributes dataframe
+
+## degree
+nodes$degree = rgraph%v%"degree"
+## mean geodesic
+nodes$mean_distance = rgraph%v%"mean_distance"
+## normalized betweenness
+nodes$norm_betweenness = rgraph%v%"norm_betweenness"
+## eigenvector
+nodes$evc = rgraph%v%"evc"
+```
+
+
+```{r img_links, echo=FALSE}
 # emojis
-net_url1 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/male-teacher_emoji.png"
-net_url2 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/female-student_emoji.png"
-net_url3 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/female-health-worker_emoji.png"
-net_url4 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/male-scientist_emoji.png"
-
-# examples
-net_url5 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/who_shall_survive.png"
-net_url6 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/neuronet.jpg"
-net_url7 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/chem_graph.jpg"
-net_url8 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/page_rank.jpg"
-net_url9 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/infrastructure_net.jpg"
-net_url10 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/terror_net.png"
-
-# others
-net_url11 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/2mode.png"
-net_url12 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/2_step.png"
+.net_url1 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/male-teacher_emoji.png"
+.net_url2 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/female-student_emoji.png"
+.net_url3 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/female-health-worker_emoji.png"
+.net_url4 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/male-scientist_emoji.png"
 ```
 
 Overview
@@ -73,31 +112,31 @@ Data Types {data-width=600}
 ### Example Data Frame
 
 | Person | Name | Age | Widgets |
-|--------------------------------|:-----|:----|:--------|
-| ![](`r net_url1`){width="10%"} | J    | 30  | 1       |
-| ![](`r net_url2`){width="10%"} | Y    | 21  | 3       |
-| ![](`r net_url3`){width="10%"} | G    | 32  | 4       |
-| ![](`r net_url4`){width="10%"} | Z    | 48  | 8       |
+|-|:-|:-|:-|
+| ![](`r .net_url1`){width="10%"} | J | 30 | 1 |
+| ![](`r .net_url2`){width="10%"} | Y | 21 | 3 |
+| ![](`r .net_url3`){width="10%"} | G | 32 | 4 |
+| ![](`r .net_url4`){width="10%"} | Z | 48 | 8 |
 
 ### Example Network
 
 ```{r echo=FALSE, out.width='100%'}
-nodes = data.frame(id = 1:4, 
+.toy_nodes = data.frame(id = 1:4, 
                     shape = "image",
                     title = c("<p style='color: black;'>Name: J<br>Age: 30<br>Widgets: 1</p>", "<p style='color: black;'>Name: Y<br>Age: 21<br>Widgets: 3</p>", "<p style='color: black;'>Name: G<br>Age: 32<br>Widgets: 4</p>", "<p style='color: black;'>Name: Z<br>Age: 48<br>Widgets: 8</p>"),
-                    image = c(net_url1, net_url2, net_url3, net_url4))
+                    image = c(.net_url1, .net_url2, .net_url3, .net_url4))
 
-edges = data.frame(from = c(2,4,3,3), to = c(1,2,4,2), label = c("Siblings", "Student", "Friends", "Parent"))
+.toy_edges = data.frame(from = c(2,4,3,3), to = c(1,2,4,2), label = c("Siblings", "Student", "Friends", "Parent"))
 
-toy_net = visNetwork(nodes, edges, width = "100%") %>% 
+.toy_net = visNetwork(.toy_nodes, .toy_edges, width = "100%") %>% 
   visNodes(shapeProperties = list(useBorderWithImage = FALSE), size = 50) %>%
   visEdges(length = 200, scaling = list(min = 400)) %>%
   visInteraction(zoomView = FALSE) %>%
   visLayout(randomSeed = 2)
 
-toy_net$sizingPolicy$browser$fill = TRUE
+.toy_net$sizingPolicy$browser$fill = TRUE
 
-toy_net
+.toy_net
 ```
 
 Network Metadata
@@ -108,39 +147,92 @@ Explanation Text
 
 ### Network Characteristics
 
+#### Density
+
+This network has a density of ???
+
+*Density* is the first real graph level metric that helps you understand what is particular about the network you are looking at. The density of a network is a numerical score showing how many ties exist in a network, given the max possible in that network. Mathematically that is $\frac{Actual Edges}{Possible Edges}$, where actual edges is the number of edges in the network, and possible edges is the number of edges if every single node in the network was connected to every other node.
+
+Networks that are more densely connected are considered to be more cohesive and robust. This means that the removal of any specific edge or node will not have a great effect of the network as a whole. It also typically means that any one node in the network will be more likely to have access to whatever resources are in the network, as there are more potential connections in the network to search for resources.
+
 
 
 Network Viewer
 --------------------------------------------------------------------------------
 
-### Base Network
+### Network Overview
 
 
 add projected or no, directional, weighted edges?
 
 density, centralization
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-References
+Degree
 ================================================================================
+
+Degree Text {data-width=400}
+--------------------------------------------------------------------------------
+
+### Degree Measure
+
+#### Description
+
+*Degree* counts how many edges are connected to a node. Degree gives a very rough measure of how popular or central a node is in the network. If a node has more ties, it may indicate that node as being more central or important the network as a whole. Degree is a raw count of the number of edges a node has, this makes the interpretation of degree highly dependent on the size of the network. In a small network with only 25 total edges, having 10 of them would be significant. In a larger network with 250 total edges, 10 edges could be less impressive. Degree should thus be interpreted in the context of other nodes in the network. 
+
+#### In This Network
+
+```{r echo=FALSE}
+hist(nodes$degree, main = "Degree Frequency", xlab = "Total Degree")
+```
+
+This network has a total of `r nrow(edges)` edges. The network on the right has the nodes scaled such that larger nodes have a higher total degree. The node highlighted in yellow in the right has the highest total degree at `r max(nodes$degree)` (`r (max(nodes$degree)/nrow(edges))*100` of all edges). 
+
+Network Viewer {data-width=600}
+--------------------------------------------------------------------------------
+
+### Degree Network
+
+```{r echo=FALSE}
+# make dataframe for vis of degree
+degree_df = nodes
+degree_df$value = degree(rgraph)^2
+degree_df$color = "#022851"
+
+# add color for largest node
+degree_df[which(max(degree_df$degree) == degree_df$degree), "color"] = "#FFBF00"
+
+visNetwork(degree_df, edges) %>%
+  visInteraction(zoomView = FALSE, dragView = FALSE) %>%
+  visOptions(highlightNearest = TRUE) %>%
+  visLayout(randomSeed = .seed)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Credits
+================================================================================
+
+DataLab {data-width=600}
+--------------------------------------------------------------------------------
+
+### About
+
+This report was coded by [Jared Joseph](https://jnjoseph.com/) for the [UC Davis DataLab](https://datalab.ucdavis.edu/); I hope you found it useful! 
+
+References {data-width=400}
+--------------------------------------------------------------------------------
 
 ### References
 
