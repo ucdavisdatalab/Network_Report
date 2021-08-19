@@ -22,6 +22,7 @@ library(rmdformats)
 library(statnet)
 library(visNetwork)
 library(skimr)
+# also need the emo package ( devtools::install_github("hadley/emo") )
 
 # options
 ## Set a random seed
@@ -156,39 +157,62 @@ Data Types {data-width=600}
 Network Metadata
 ================================================================================
 
-Explanation Text
+Explanation Text {data-width=600}
 --------------------------------------------------------------------------------
 
 ### Network Characteristics
-
-#### Summary
 
 | Network Property | Measurement |
 |:-|:-|
 | Nodes | `r nrow(nodes)` |
 | Edges | `r nrow(edges)` | 
 | Density | `r round(gden(rgraph), digits = 3)` | 
-| Directed | |
+| Degree Centralization  | `r round(centralization(rgraph, degree, mode = .directed_flag), digits = 3)` |
+| Betweenness Centralization | `r round(centralization(rgraph, betweenness, mode = .directed_flag), digits = 3)` |
+| Eigenvector Centralization | `r round(centralization(rgraph, evcent, mode = .directed_flag), digits = 3)` |
+| Directed | `r ifelse(.directed, emo::ji("check"), emo::ji("x"))` |
+| Weighted Edges| PLACEHOLDER |
+| Projected | PLACEHOLDER |
+
+### Explanations
 
 #### Density
-
-This network has a density of ???
 
 *Density* is the first real graph level metric that helps you understand what is particular about the network you are looking at. The density of a network is a numerical score showing how many ties exist in a network, given the max possible in that network. Mathematically that is $\frac{Actual Edges}{Possible Edges}$, where actual edges is the number of edges in the network, and possible edges is the number of edges if every single node in the network was connected to every other node.
 
 Networks that are more densely connected are considered to be more cohesive and robust. This means that the removal of any specific edge or node will not have a great effect of the network as a whole. It also typically means that any one node in the network will be more likely to have access to whatever resources are in the network, as there are more potential connections in the network to search for resources.
 
+#### Centralization
 
+*Freeman Centralization* (usually just called *centralization*) gives a sense of the shape of the network, namely how node level measures are distributed in a network. We'll discuss node level measures next, but for now it is only important to understand that node level measures are numeric scores assigned to specific nodes rather than the network as a whole. This means that each node may have a different value.
 
-Network Viewer
+Centralization is a measure of how unevenly node level metrics are distributed in a network. Scores closer to 0 mean the metric is evenly distributed, while scores closer to 1 indicate a concentration of the metric with a few nodes.
+
+#### Directed/Un-Directed
+
+Networks can either be *directed* or *un-directed*. A directed network treats the edges between nodes as having a specific direction of flow, while an un-directed network considers all edges to be mutual. An example of each is presented below.
+
+A directed network tracks which node is the source and which node is the receiver for an edge. Take for example the *follow* mechanic on Twitter. User A can follow User B, creating a directed edge from A to B, but B does not have to follow A in return. This can be useful when trying to understand the flows of resources that are finite such as money or goods.
+
+An un-directed network treats all ties as mutual, such that A and B are both involved equally in a tie. An example is the *friend* mechanic on Facebook. Once a friendship is established, both users are considered equal in the tie. This can be helpful when you do not have information on what node initiates a tie, or when events happen equally to a group of nodes, such as all nodes being connected through co-membership in a group.
+
+Which of these will be useful to you will likely change from project to project. However, it is vital to understand what kind of network you are working with, as many network calculations we will talk about later change their behavior based on if the network is directed or not.
+
+#### Projected/Bipartite
+
+Often, you will not have individual level network data, but you will have data on group membership. For example, if you wanted to map the social networks of student, but don't know who they actually hang around with, you may be able to use class rosters to build an approximate network. This is call a *bipartite network*, *two-mode*, or *projected network*. You can "collapse" such a network into a student network by assuming every student connected to a class is connected to each other. The same is true with classes, such that classes are related to each other if a single student is enrolled in both. This assumption may not always be correct, and you need to take care if you are going to make it in your research. If a class has 300 students, it is most likely not correct to assume every student knows every other student in that class.
+
+Network Viewer {data-width=400}
 --------------------------------------------------------------------------------
 
 ### Network Overview
 
-
-add projected or no, directional, weighted edges?
-
-density, centralization
+```{r echo=FALSE}
+visNetwork(nodes, edges) %>%
+  visInteraction(zoomView = FALSE, dragView = FALSE) %>%
+  visOptions(highlightNearest = TRUE) %>%
+  visLayout(randomSeed = .seed)
+```
 
 Degree
 ================================================================================
@@ -209,8 +233,6 @@ skim_without_charts(nodes$degree) %>% yank("numeric")
 ```
 
 This network has a total of `r nrow(edges)` edges. The network on the right has the nodes scaled such that larger nodes have a higher total degree. The node highlighted in yellow in the right has the highest total degree at `r max(nodes$degree)` (`r round((max(nodes$degree)/nrow(edges))*100, digits = 3)`% of all edges).
-
-This network has a degree centralization of `r round(centralization(rgraph, degree, mode = "graph"), digits = 3)`. Centralization is a measure of how unevenly node level metrics are distributed in a network. Scores closer to 0 mean the metric is evenly distributed, while scores closer to 1 indicate a concentration of the metric with a few nodes.
 
 Network Viewer
 --------------------------------------------------------------------------------
@@ -313,8 +335,6 @@ skim_without_charts(nodes$norm_betweenness) %>% yank("numeric")
 ```
 
 The mean betweenness centrality in this network is `r round(mean(nodes$norm_betweenness), digits = 3)`. The network on the right has the nodes scaled such that larger nodes have a larger betweenness centrality. The node highlighted in gold on the right has the largest betweenness centrality at `r max(nodes$norm_betweenness)`; this node likely acts as a gatekeeper in the network. Imagine this node were removed, how would resources need to flow differently in the network without it? The grey node has the smallest betweenness centrality at `r min(nodes$norm_betweenness)`; the network would likely be unaffected by their removal in terms of resource flows.  
-
-This network has a betweenness centralization of `r round(centralization(rgraph, betweenness, mode = "graph"), digits = 3)`. Centralization is a measure of how unevenly node level metrics are distributed in a network. Scores closer to 0 mean the metric is evenly distributed, while scores closer to 1 indicate a concentration of the metric with a few nodes.
 
 Betweenness Viewer
 --------------------------------------------------------------------------------
