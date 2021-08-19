@@ -4,6 +4,13 @@ output:
   flexdashboard::flex_dashboard:
     orientation: columns
     vertical_layout: fill
+    social: menu
+    source_code: embed
+#    theme: 
+#      version: 4
+#      bootswatch: yeti
+#    includes:
+#      after_body: footer.html
 bibliography: ../references.bib
 link-citations: TRUE
 ---
@@ -170,14 +177,14 @@ density, centralization
 Degree
 ================================================================================
 
-Degree Text {data-width=400}
+Degree Text
 --------------------------------------------------------------------------------
 
 ### Degree Measure
 
 #### Description
 
-*Degree* counts how many edges are connected to a node. Degree gives a very rough measure of how popular or central a node is in the network. If a node has more ties, it may indicate that node as being more central or important the network as a whole. Degree is a raw count of the number of edges a node has, this makes the interpretation of degree highly dependent on the size of the network. In a small network with only 25 total edges, having 10 of them would be significant. In a larger network with 250 total edges, 10 edges could be less impressive. Degree should thus be interpreted in the context of other nodes in the network. 
+*Degree* counts how many edges are connected to a node. Degree gives a very rough measure of how popular or central a node is in the network. If a node has more ties, it may indicate that node as being more central or important in the network as a whole. Degree is a raw count of the number of edges a node has, this makes the interpretation of degree highly dependent on the size of the network. In a small network with only 25 total edges, having 10 of them would be significant. In a larger network with 250 total edges, 10 edges could be less impressive. Degree should thus be interpreted in the context of other nodes in the network. 
 
 #### In This Network
 
@@ -185,9 +192,11 @@ Degree Text {data-width=400}
 skim_without_charts(nodes$degree) %>% yank("numeric")
 ```
 
-This network has a total of `r nrow(edges)` edges. The network on the right has the nodes scaled such that larger nodes have a higher total degree. The node highlighted in yellow in the right has the highest total degree at `r max(nodes$degree)` (`r round((max(nodes$degree)/nrow(edges))*100, digits = 2)`% of all edges). 
+This network has a total of `r nrow(edges)` edges. The network on the right has the nodes scaled such that larger nodes have a higher total degree. The node highlighted in yellow in the right has the highest total degree at `r max(nodes$degree)` (`r round((max(nodes$degree)/nrow(edges))*100, digits = 2)`% of all edges).
 
-Network Viewer {data-width=600}
+This network has a degree centralization of `r round(centralization(rgraph, degree, mode = "graph"), digits = 2)`. Centralization is a measure of how unevenly node level metrics are distributed in a network. Scores closer to 0 mean the metric is evenly distributed, while scores closer to 1 indicate a concentration of the metric with a few nodes.
+
+Network Viewer
 --------------------------------------------------------------------------------
 
 ### Degree Network
@@ -206,10 +215,173 @@ visNetwork(degree_df, edges) %>%
   visOptions(highlightNearest = TRUE) %>%
   visLayout(randomSeed = .seed)
 ```
+
 ### Degree Plot
 
 ```{r echo=FALSE}
 hist(nodes$degree, main = "Degree Frequency", xlab = "Total Degree")
+```
+
+Geodesic Distance
+================================================================================
+
+Geodesic Distance Text
+--------------------------------------------------------------------------------
+
+### Geodesic Distance Measure
+
+#### Description
+
+**Geodesic Distance** is "the length of the shortest path via the edges or binary connections between nodes" [@kadushinUnderstandingSocialNetworks2012]. In other words, if we treat the network as a map we can move along, with the nodes being stopping places and the edges being paths, the geodesic is the shortest possible path we can use to walk between two nodes. 
+
+Nodes that on average have a shorter geodesic distance between all the other nodes in the network are considered to have have greater access to the resources in a network. This is because a node with a low average geodesic distance can theoretically "reach" the other nodes with less effort because it does not need to travel as far. This is our first instance of how network structure, not node attributes, can inform us about the nodes in a network. Essentially, looking at the network as a whole can tell us things about the people in it that is lost if we look only at individuals.
+
+Note that while there is a correlation between degree counts and mean geodesic distance, one does not cause the other.
+
+#### In This Network
+
+```{r echo=FALSE}
+skim_without_charts(nodes$mean_distance) %>% yank("numeric")
+```
+The mean geodesic distance in this network is `r round(mean(nodes$mean_distance), digits = 2)`. The network on the right has the nodes scaled such that larger nodes have a **lower** mean geodesic distance. The node highlighted in yellow in the right has the lowest mean geodesic distance at `r min(nodes$mean_distance)`; it will usually be centrally located in the network. The grey node has the highest at `r max(nodes$mean_distance)`, and would need to travel through the whole network to reach the nodes on the opposite side.
+
+Network Viewer
+--------------------------------------------------------------------------------
+
+### Geodesic Distance Network
+
+```{r Geodesic, echo=FALSE, message=FALSE, warning=FALSE}
+# make df to vis geodesic distances
+gdist_df = nodes
+gdist_df$value = (rgraph%v%"mean_distance" * -1)
+gdist_df$color = "#022851"
+
+# replace min average geodesic with gold, max with grey
+gdist_df$color[which(rgraph%v%"mean_distance" == min(rgraph%v%"mean_distance"))] = "#FFBF00"
+gdist_df$color[which(rgraph%v%"mean_distance" == max(rgraph%v%"mean_distance"))] = "#CDD6E0"
+
+# add label as geodesic distance, rounding to 3 digits
+rgraph$label = round(rgraph%v%"mean_distance", 2)
+
+# plot
+visNetwork(gdist_df, edges) %>%
+  visInteraction(zoomView = FALSE, dragView = FALSE) %>%
+  visOptions(highlightNearest = TRUE) %>%
+  visLayout(randomSeed = .seed)
+```
+
+### Geodesic Distance Plot
+
+```{r echo=FALSE}
+hist(nodes$mean_distance, main = "Mean Geodesic Distance", xlab = "Geodesic Distance")
+```
+
+Betweenness
+================================================================================
+
+Betweenness Text
+--------------------------------------------------------------------------------
+
+### Betweenness
+
+#### Description
+
+**Betweenness Centrality** tries to calculate the extent to which a node acts as a gatekeeper or *broker* in the network. A broker bridges two otherwise disconnected segments in a network. If there are two parts of a network that would otherwise be broken apart if a node was removed, they would have a high betweenness centrality. The fragmenting of a network is not a prerequisite however, simply acting as an effective "shortcut" in a network can also raise a node's betweenness centrality. Betweenness is calculated using geodesic distances, and gives a higher score to nodes that lie on more geodesic paths.
+
+Centrality scores such as this are usually normalized such that their scores all sum to 1. This way, you can easily compare nodes within the network (but not between networks), and understand how nodes relate to each other structurally. It is possible for a node to have a 0 betweenness score if no geodesic distances pass through them.
+
+#### In This Network
+
+```{r echo=FALSE}
+skim_without_charts(nodes$norm_betweenness) %>% yank("numeric")
+```
+
+The mean betweenness centrality in this network is `r round(mean(nodes$norm_betweenness), digits = 2)`. The network on the right has the nodes scaled such that larger nodes have a larger betweenness centrality. The node highlighted in gold on the right has the largest betweenness centrality at `r max(nodes$norm_betweenness)`; this node likely acts as a gatekeeper in the network. Imagine this node were removed, how would resources need to flow differently in the network without it? The grey node has the smallest betweenness centrality at `r min(nodes$norm_betweenness)`; the network would likely be unaffected by their removal in terms of resource flows.  
+
+This network has a betweenness centralization of `r round(centralization(rgraph, betweenness, mode = "graph"), digits = 2)`. Centralization is a measure of how unevenly node level metrics are distributed in a network. Scores closer to 0 mean the metric is evenly distributed, while scores closer to 1 indicate a concentration of the metric with a few nodes.
+
+Betweenness Viewer
+--------------------------------------------------------------------------------
+
+### Betweenness Network
+
+```{r betweenness, echo=FALSE, message=FALSE, warning=FALSE}
+
+bet_df = nodes
+bet_df$value = rgraph%v%"norm_betweenness"
+bet_df$color = "#022851"
+
+# add label as geodesic distance, rounding to 2 digits
+bet_df$label = round(rgraph%v%"norm_betweenness", 2)
+
+
+# replace max average geodesic with gold, min with grey
+bet_df$color[which(rgraph%v%"norm_betweenness" == max(rgraph%v%"norm_betweenness"))] = "#FFBF00"
+bet_df$color[which(rgraph%v%"norm_betweenness" == min(rgraph%v%"norm_betweenness"))] = "#CDD6E0"
+
+# plot
+visNetwork(bet_df, edges) %>%
+  visInteraction(zoomView = FALSE, dragView = FALSE) %>%
+  visOptions(highlightNearest = TRUE) %>%
+  visLayout(randomSeed = .seed)
+```
+
+### Betweenness Plot
+
+```{r echo=FALSE}
+hist(nodes$norm_betweenness, main = "Normalized Betweenness", xlab = "Node Betweenness")
+```
+
+Eigenvector
+================================================================================
+
+Eigenvector Text
+--------------------------------------------------------------------------------
+
+### Eigenvector Header
+
+#### Description
+
+**Eigenvector Centrality** is commonly known as a measure of "popular friends." Rather than looking at the network position of a node, it looks at the network positions of nodes connected to it. Nodes with a high eigenvector score will be connected to nodes more prominent in the network. Nodes with low degree can have high eigenvector scores if they are connected to important nodes. In real life networks this can be interpreted as being close to influential others in a network.
+
+#### In This Network
+
+```{r echo=FALSE}
+skim_without_charts(nodes$evc) %>% yank("numeric")
+```
+
+The mean eigenvector centrality in this network is `r round(mean(nodes$evc), digits = 2)`. The network on the right has the nodes scaled such that larger nodes have a larger eigenvector centrality. The node highlighted in gold on the right has the largest eigenvector centrality at `r max(nodes$evc)`; this node may not be the most central node in the network, but it is connected to many important partners. The grey node has the smallest eigenvector centrality at `r min(nodes$evc)`.
+
+This network has a eigenvector centralization of `r round(centralization(rgraph, evcent, mode = "graph"), digits = 2)`. Centralization is a measure of how unevenly node level metrics are distributed in a network. Scores closer to 0 mean the metric is evenly distributed, while scores closer to 1 indicate a concentration of the metric with a few nodes.
+
+Eigenvector Viewer
+--------------------------------------------------------------------------------
+
+### Eigenvector Network
+
+```{r eigenvector, echo=FALSE, message=FALSE, warning=FALSE}
+evc_df = nodes
+evc_df$value = rgraph%v%"evc"
+evc_df$color = "#022851"
+
+# add label as geodesic distance, rounding to 2 digits
+evc_df$label = round(rgraph%v%"evc", 2)
+
+# replace min average geodesic with gold, min with grey
+evc_df$color[which(rgraph%v%"evc" == max(rgraph%v%"evc"))] = "#FFBF00"
+evc_df$color[which(rgraph%v%"evc" == min(rgraph%v%"evc"))] = "#CDD6E0"
+
+# plot
+visNetwork(evc_df, edges) %>%
+  visInteraction(zoomView = FALSE, dragView = FALSE) %>%
+  visOptions(highlightNearest = TRUE) %>%
+  visLayout(randomSeed = .seed)
+```
+
+### Eigenvector Plot
+
+```{r echo=FALSE}
+hist(nodes$evc, main = "Eigenvector Betweenness", xlab = "Node Eigenvector")
 ```
 
 
@@ -219,8 +391,24 @@ hist(nodes$degree, main = "Degree Frequency", xlab = "Total Degree")
 
 
 
+Template
+================================================================================
 
+Template Text
+--------------------------------------------------------------------------------
 
+### Template Header
+
+#### Description
+
+#### In This Network
+
+Template Viewer
+--------------------------------------------------------------------------------
+
+### Degree Network
+
+### Degree Plot
 
 
 
