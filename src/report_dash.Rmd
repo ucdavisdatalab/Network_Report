@@ -18,7 +18,6 @@ link-citations: TRUE
 ```{r setup, include=FALSE}
 library(flexdashboard)
 library(knitr)
-library(rmdformats)
 library(statnet)
 library(visNetwork)
 library(skimr)
@@ -29,7 +28,8 @@ library(skimr)
 .seed = 1337
 ## is this network directed?
 .directed = FALSE
-
+## is this network multiplex?
+.multiplex = FALSE
 
 # knitr options
 options(max.print="75")
@@ -56,7 +56,7 @@ edges = read.csv("./data/edges.csv", header = TRUE, stringsAsFactors = FALSE)
 ## sort your attributes frame alphabetically. Super important!
 nodes = nodes[order(nodes$id), ]
 ## make network!
-rgraph = network(edges, directed = .directed, matrix.type = "edgelist")
+rgraph = network(edges, directed = .directed, matrix.type = "edgelist", multiple = .multiplex)
 
 # largest component
 
@@ -95,10 +95,10 @@ nodes$evc = rgraph%v%"evc"
 
 ```{r img_links, echo=FALSE}
 # emojis
-.net_url1 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/male-teacher_emoji.png"
-.net_url2 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/female-student_emoji.png"
-.net_url3 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/female-health-worker_emoji.png"
-.net_url4 = "https://raw.githubusercontent.com/Epsian/sna_lecture/main/resources/male-scientist_emoji.png"
+.net_url1 = "./img/male-teacher_emoji.png"
+.net_url2 = "./img/female-student_emoji.png"
+.net_url3 = "./img/female-health-worker_emoji.png"
+.net_url4 = "./img/male-scientist_emoji.png"
 ```
 
 Overview
@@ -171,7 +171,7 @@ Explanation Text {data-width=600}
 | Betweenness Centralization | `r round(centralization(rgraph, betweenness, mode = .directed_flag), digits = 3)` |
 | Eigenvector Centralization | `r round(centralization(rgraph, evcent, mode = .directed_flag), digits = 3)` |
 | Directed | `r ifelse(.directed, emo::ji("check"), emo::ji("x"))` |
-| Weighted Edges| PLACEHOLDER |
+| Weighted Edges| `r ifelse(rgraph$gal$multiple, emo::ji("check"), emo::ji("x"))` |
 | Projected | PLACEHOLDER |
 
 ### Explanations
@@ -197,6 +197,10 @@ A directed network tracks which node is the source and which node is the receive
 An un-directed network treats all ties as mutual, such that A and B are both involved equally in a tie. An example is the *friend* mechanic on Facebook. Once a friendship is established, both users are considered equal in the tie. This can be helpful when you do not have information on what node initiates a tie, or when events happen equally to a group of nodes, such as all nodes being connected through co-membership in a group.
 
 Which of these will be useful to you will likely change from project to project. However, it is vital to understand what kind of network you are working with, as many network calculations we will talk about later change their behavior based on if the network is directed or not.
+
+#### Weighted Edges
+
+Edges in most network are un-weighted, such that edges either exist or they do not. It is possible to have weighted edges in a network, such that some edges are considered more imprtant than others. This is often used to represent multiple interactions. For example if your network is composed of people, an un-weighted edge might denote two individuals as freinds, whereas a weighted edge may indicate how many time two individuals spend time together; in this situation an edge weight of 1 would be one meeting, while and edge weight of 5 would be five meetings.
 
 #### Projected/Bipartite
 
@@ -232,7 +236,7 @@ Degree Text
 skim_without_charts(nodes$degree) %>% yank("numeric")
 ```
 
-This network has a total of `r nrow(edges)` edges. The network on the right has the nodes scaled such that larger nodes have a higher total degree. The node highlighted in yellow in the right has the highest total degree at `r max(nodes$degree)` (`r round((max(nodes$degree)/nrow(edges))*100, digits = 3)`% of all edges).
+This network has a total of `r nrow(edges)` edges. The network on the right has the nodes scaled such that larger nodes have a higher total degree. The node highlighted in yellow in the right has the highest total degree at `r max(nodes$degree)` (`r round((max(nodes$degree)/nrow(edges))*100, digits = 3)`% of all edges). The node(s) highlighted in grey has the lowest total degree at `r min(nodes$degree)`
 
 Network Viewer
 --------------------------------------------------------------------------------
@@ -247,6 +251,7 @@ degree_df$color = "#022851"
 
 # add color for largest node
 degree_df[which(max(degree_df$degree) == degree_df$degree), "color"] = "#FFBF00"
+degree_df[which(min(degree_df$degree) == degree_df$degree), "color"] = "#CDD6E0"
 
 visNetwork(degree_df, edges) %>%
   visInteraction(zoomView = FALSE, dragView = FALSE) %>%
