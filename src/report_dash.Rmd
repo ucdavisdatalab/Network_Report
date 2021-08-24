@@ -95,10 +95,10 @@ nodes$evc = rgraph%v%"evc"
 
 ```{r img_links, echo=FALSE}
 # emojis
-.net_url1 = "./img/male-teacher_emoji.png"
-.net_url2 = "./img/female-student_emoji.png"
-.net_url3 = "./img/female-health-worker_emoji.png"
-.net_url4 = "./img/male-scientist_emoji.png"
+.net_url1 = "../img/male-teacher_emoji.png"
+.net_url2 = "../img/female-student_emoji.png"
+.net_url3 = "../img/female-health-worker_emoji.png"
+.net_url4 = "../img/male-scientist_emoji.png"
 ```
 
 Overview
@@ -212,7 +212,36 @@ Network Viewer {data-width=400}
 ### Network Overview
 
 ```{r echo=FALSE}
-visNetwork(nodes, edges) %>%
+overview_net = nodes
+
+overview_net$title = paste0("<table>",
+                              "<tr>",
+                                "<th>Measurement</th>",
+                                "<th>Value</th>",
+                              "</tr>",
+                              "<tr>",
+                                "<td>Node ID</td>",
+                                "<td>", overview_net$id, "</td>",
+                              "</tr>",
+                              "<tr>",
+                                "<td>Total Degree</td>",
+                                "<td>", round(overview_net$degree, digits = 3), "</td>",
+                              "</tr>",
+                              "<tr>",
+                                "<td>Mean Geodesic Distance</td>",
+                                "<td>", round(overview_net$mean_distance, digits = 3), "</td>",
+                              "</tr>",
+                              "<tr>",
+                                "<td>Norm Betweenness Centrality</td>",
+                                "<td>", round(overview_net$norm_betweenness, digits = 3), "</td>",
+                              "</tr>",
+                              "<tr>",
+                                "<td>Eigenvector Centrality</td>",
+                                "<td>", round(overview_net$evc, digits = 3), "</td>",
+                              "</tr>",
+                            "</table>")
+
+visNetwork(overview_net, edges) %>%
   visInteraction(zoomView = FALSE, dragView = FALSE) %>%
   visOptions(highlightNearest = TRUE) %>%
   visLayout(randomSeed = .seed)
