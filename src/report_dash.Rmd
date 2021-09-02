@@ -439,8 +439,8 @@ evc_df = vnet$nodes
 evc_df$value = evc_df$evc
 evc_df$color = "#355B85"
 
-# add label as geodesic distance, rounding to 2 digits
-#evc_df$label = round(rgraph%v%"evc", 2)
+# add label as geodesic distance, rounding to 3 digits
+evc_df$label = paste0(evc_df$id, "\n", round(evc_df$evc, 3))
 
 # replace min average geodesic with gold, min with grey
 evc_df$color[which(evc_df$evc == max(evc_df$evc))] = "#FFBF00"
