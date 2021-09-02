@@ -111,15 +111,17 @@ Welcome! {data-width=400}
 
 #### Report Introduction
 
+Report generated: `r format(Sys.time(), '%B %d, %Y')`
+
 This report will ingest pre-formatted network data and walk readers through some preliminary network metrics. All of the text in this report is generalized to any network it could render; it is not specific to the data displayed. Because of this, some metrics may not be relevant to a specific data set. Please talk with the DataLab about the outcomes of this report for help with interpretation and applications of these outcomes.
 
-To navigate this report, use the tabs at the top of the page. Each page will walk you through one network metric and it's interpretation. The remainder of this tab will cover some network basics.
+To navigate this report, use the tabs at the top of the page. Each page will walk you through one network metric and it's interpretation. The remainder of this tab will cover some network basics. If you have any questions, please contact us at <a href = "mailto:datalab@ucdavis.edu">datalab@ucdavis.edu</a>.
 
 #### Network Background
 
 You may be familiar with tabular data; rows and columns containing information. You can see a representation of this data to the right on top. While this is a tidy way to store data, it artificially atomizes or separates many of the things we are interested in as researchers, social or otherwise. Network analysis is a tool to work with *relational* data, a.k.a. information about how entities are connected with each other. For example, the diagram on the bottom right shows the same data as the table above, with the added benefit of showing how these individuals are connected to each other. Hover over the people to reveal the data about them.
 
-Rather than looking only at attributes of specific data points, we are looking at the connections between data. In network analysis, data points are called *nodes* or *vertices*, and the connections between them are called *edges* or *ties*. Vertices can be anything---people, places, words, concepts---they are usually mapped into rows in a data frame. Edges contain any information on how these things connect or are related to each other. These components create a *network* or *graph*, defined as "finite set or sets of actors and the relation or relations defined on them" [@wassermanSocialNetworkAnalysis1994].
+Rather than looking only at attributes of specific data points, we are looking at the connections between data. In network analysis, data points are called *nodes* or *vertices*, and the connections between them are called *edges* or *ties*. Vertices can be anything---people, places, words, concepts---they are usually mapped into rows in a data frame. Edges contain any information on how these things connect or are related to each other. These parts create a *network* or *graph*, defined as "finite set or sets of actors and the relation or relations defined on them" [@wassermanSocialNetworkAnalysis1994].
 
 Data Types {data-width=600}
 --------------------------------------------------------------------------------
@@ -157,36 +159,28 @@ Data Types {data-width=600}
 Network Metadata
 ================================================================================
 
-Explanation Text {data-width=600}
+Explanation Text
 --------------------------------------------------------------------------------
 
-### Network Characteristics
+### Network Characteristics {data-height=320}
 
 | Network Property | Measurement |
 |:-|:-|
 | Nodes | `r nrow(nodes)` |
 | Edges | `r nrow(edges)` | 
+| Directed | `r ifelse(.directed, emo::ji("check"), emo::ji("x"))` |
+| Weighted Edges| `r ifelse(rgraph$gal$multiple, emo::ji("check"), emo::ji("x"))` |
+| Projected | PLACEHOLDER |
 | Density | `r round(gden(rgraph), digits = 3)` | 
 | Degree Centralization  | `r round(centralization(rgraph, degree, mode = .directed_flag), digits = 3)` |
 | Betweenness Centralization | `r round(centralization(rgraph, betweenness, mode = .directed_flag), digits = 3)` |
 | Eigenvector Centralization | `r round(centralization(rgraph, evcent, mode = .directed_flag), digits = 3)` |
-| Directed | `r ifelse(.directed, emo::ji("check"), emo::ji("x"))` |
-| Weighted Edges| `r ifelse(rgraph$gal$multiple, emo::ji("check"), emo::ji("x"))` |
-| Projected | PLACEHOLDER |
 
 ### Explanations
 
-#### Density
+#### Overview
 
-*Density* is the first real graph level metric that helps you understand what is particular about the network you are looking at. The density of a network is a numerical score showing how many ties exist in a network, given the max possible in that network. Mathematically that is $\frac{Actual Edges}{Possible Edges}$, where actual edges is the number of edges in the network, and possible edges is the number of edges if every single node in the network was connected to every other node.
-
-Networks that are more densely connected are considered to be more cohesive and robust. This means that the removal of any specific edge or node will not have a great effect of the network as a whole. It also typically means that any one node in the network will be more likely to have access to whatever resources are in the network, as there are more potential connections in the network to search for resources.
-
-#### Centralization
-
-*Freeman Centralization* (usually just called *centralization*) gives a sense of the shape of the network, namely how node level measures are distributed in a network. We'll discuss node level measures next, but for now it is only important to understand that node level measures are numeric scores assigned to specific nodes rather than the network as a whole. This means that each node may have a different value.
-
-Centralization is a measure of how unevenly node level metrics are distributed in a network. Scores closer to 0 mean the metric is evenly distributed, while scores closer to 1 indicate a concentration of the metric with a few nodes.
+This tab contains some meta-information about the network. This includes the number of nodes and edges, as well as more specialized characteristics and measures. The rest of this space is dedicated to explaining those things in a general way. If you would like to see more information about specific nodes in the network, you can hover over them on the right to see a tooltip about that node. You can also find nodes sorted alphabetically in the top left pull-down menu.
 
 #### Directed/Un-Directed
 
@@ -200,13 +194,25 @@ Which of these will be useful to you will likely change from project to project.
 
 #### Weighted Edges
 
-Edges in most network are un-weighted, such that edges either exist or they do not. It is possible to have weighted edges in a network, such that some edges are considered more imprtant than others. This is often used to represent multiple interactions. For example if your network is composed of people, an un-weighted edge might denote two individuals as freinds, whereas a weighted edge may indicate how many time two individuals spend time together; in this situation an edge weight of 1 would be one meeting, while and edge weight of 5 would be five meetings.
+Edges in most network are un-weighted, such that edges either exist or they do not. It is possible to have weighted edges in a network, such that some edges are considered more important than others. This is often used to represent multiple interactions. For example if your network is composed of people, an un-weighted edge might denote two individuals as friends, whereas a weighted edge may indicate how many time two individuals spend time together; in this situation an edge weight of 1 would be one meeting, while and edge weight of 5 would be five meetings.
 
 #### Projected/Bipartite
 
 Often, you will not have individual level network data, but you will have data on group membership. For example, if you wanted to map the social networks of student, but don't know who they actually hang around with, you may be able to use class rosters to build an approximate network. This is call a *bipartite network*, *two-mode*, or *projected network*. You can "collapse" such a network into a student network by assuming every student connected to a class is connected to each other. The same is true with classes, such that classes are related to each other if a single student is enrolled in both. This assumption may not always be correct, and you need to take care if you are going to make it in your research. If a class has 300 students, it is most likely not correct to assume every student knows every other student in that class.
 
-Network Viewer {data-width=400}
+#### Density
+
+*Density* is the first real graph level metric that helps you understand what is particular about the network you are looking at. The density of a network is a numerical score showing how many ties exist in a network, given the max possible in that network. Mathematically that is $\frac{Actual Edges}{Possible Edges}$, where actual edges is the number of edges in the network, and possible edges is the number of edges if every single node in the network was connected to every other node.
+
+Networks that are more densely connected are considered to be more cohesive and robust. This means that the removal of any specific edge or node will not have a great effect of the network as a whole. It also typically means that any one node in the network will be more likely to have access to whatever resources are in the network, as there are more potential connections in the network to search for resources.
+
+#### Centralization
+
+*Freeman Centralization* (usually just called *centralization*) gives a sense of the shape of the network, namely how node level measures are distributed in a network. We'll discuss node level measures next, but for now it is only important to understand that node level measures are numeric scores assigned to specific nodes rather than the network as a whole. This means that each node may have a different value.
+
+Centralization is a measure of how unevenly node level metrics are distributed in a network. Scores closer to 0 mean the metric is evenly distributed, while scores closer to 1 indicate a concentration of the metric with a few nodes.
+
+Network Viewer
 --------------------------------------------------------------------------------
 
 ### Network Overview
@@ -243,7 +249,7 @@ overview_net$title = paste0("<table>",
 
 visNetwork(overview_net, edges) %>%
   visInteraction(zoomView = FALSE, dragView = FALSE) %>%
-  visOptions(highlightNearest = TRUE) %>%
+  visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
   visLayout(randomSeed = .seed)
 ```
 
@@ -284,7 +290,7 @@ degree_df[which(min(degree_df$degree) == degree_df$degree), "color"] = "#CDD6E0"
 
 visNetwork(degree_df, edges) %>%
   visInteraction(zoomView = FALSE, dragView = FALSE) %>%
-  visOptions(highlightNearest = TRUE) %>%
+  visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
   visLayout(randomSeed = .seed)
 ```
 
@@ -338,7 +344,7 @@ rgraph$label = round(rgraph%v%"mean_distance", 2)
 # plot
 visNetwork(gdist_df, edges) %>%
   visInteraction(zoomView = FALSE, dragView = FALSE) %>%
-  visOptions(highlightNearest = TRUE) %>%
+  visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
   visLayout(randomSeed = .seed)
 ```
 
@@ -392,7 +398,7 @@ bet_df$color[which(rgraph%v%"norm_betweenness" == min(rgraph%v%"norm_betweenness
 # plot
 visNetwork(bet_df, edges) %>%
   visInteraction(zoomView = FALSE, dragView = FALSE) %>%
-  visOptions(highlightNearest = TRUE) %>%
+  visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
   visLayout(randomSeed = .seed)
 ```
 
@@ -444,7 +450,7 @@ evc_df$color[which(rgraph%v%"evc" == min(rgraph%v%"evc"))] = "#CDD6E0"
 # plot
 visNetwork(evc_df, edges) %>%
   visInteraction(zoomView = FALSE, dragView = FALSE) %>%
-  visOptions(highlightNearest = TRUE) %>%
+  visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
   visLayout(randomSeed = .seed)
 ```
 
