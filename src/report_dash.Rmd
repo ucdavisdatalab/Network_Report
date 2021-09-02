@@ -284,6 +284,9 @@ degree_df$color = "#355B85"
 degree_df[which(max(degree_df$degree) == degree_df$degree), "color"] = "#FFBF00"
 degree_df[which(min(degree_df$degree) == degree_df$degree), "color"] = "#CDD6E0"
 
+# add label
+degree_df$label = paste0(degree_df$id, "\n", round(degree_df$degree, 3))
+
 visNetwork(degree_df, vnet$edges) %>%
   visInteraction(zoomView = FALSE, dragView = FALSE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
@@ -335,7 +338,7 @@ gdist_df$color[which(gdist_df$mean_geodist == min(gdist_df$mean_geodist))] = "#F
 gdist_df$color[which(gdist_df$mean_geodist == max(gdist_df$mean_geodist))] = "#CDD6E0"
 
 # add label as geodesic distance, rounding to 3 digits
-rgraph$label = round(gdist_df$mean_geodist, 2)
+gdist_df$label = paste0(gdist_df$id, "\n", round(gdist_df$mean_geodist, 3))
 
 # plot
 visNetwork(gdist_df, vnet$edges) %>%
@@ -383,8 +386,8 @@ bet_df = vnet$nodes
 bet_df$value = bet_df$norm_betweenness
 bet_df$color = "#355B85"
 
-# add label as geodesic distance, rounding to 2 digits
-#bet_df$label = round(bet_df$norm_betweenness, 2)
+# add label as geodesic distance, rounding to 3 digits
+bet_df$label = paste0(bet_df$id, "\n", round(bet_df$norm_betweenness, 3))
 
 
 # replace max average geodesic with gold, min with grey
