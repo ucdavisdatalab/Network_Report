@@ -162,15 +162,15 @@ Explanation Text
 
 | Network Property | Measurement |
 |:-|:-|
-| Nodes | `r nrow(nodes)` |
-| Edges | `r nrow(edges)` | 
+| Nodes | `r vcount(rgraph)` |
+| Edges | `r ecount(rgraph)` | 
 | Directed | `r ifelse(.directed, emo::ji("check"), emo::ji("x"))` |
-| Weighted Edges| `r ifelse(rgraph$gal$multiple, emo::ji("check"), emo::ji("x"))` |
+| Weighted Edges| `r ifelse(.multiplex, emo::ji("check"), emo::ji("x"))` |
 | Projected | PLACEHOLDER |
-| Density | `r round(gden(rgraph), digits = 3)` | 
-| Degree Centralization  | `r round(centralization(rgraph, degree, mode = .directed_flag), digits = 3)` |
-| Betweenness Centralization | `r round(centralization(rgraph, betweenness, mode = .directed_flag), digits = 3)` |
-| Eigenvector Centralization | `r round(centralization(rgraph, evcent, mode = .directed_flag), digits = 3)` |
+| Density | `r round(edge_density(rgraph), digits = 3)` | 
+| Degree Centralization  | `r round(centralization.degree(rgraph, mode = "all", normalized = TRUE)$centralization, digits = 3)` |
+| Betweenness Centralization | `r round(centralization.betweenness(rgraph, directed = .directed, normalized = TRUE)$centralization, digits = 3)` |
+| Eigenvector Centralization | `r round(centralization.evcent(rgraph, directed = .directed, normalized = TRUE)$centralization, digits = 3)` |
 
 ### Explanations
 
@@ -267,7 +267,7 @@ Degree Text
 skim_without_charts(vnet$nodes$degree) %>% yank("numeric")
 ```
 
-This network has a total of `r nrow(edges)` edges. The network on the right has the nodes scaled such that larger nodes have a higher total degree. The node highlighted in yellow in the right has the highest total degree at `r max(nodes$degree)` (`r round((max(nodes$degree)/nrow(edges))*100, digits = 3)`% of all edges). The node(s) highlighted in grey has the lowest total degree at `r min(nodes$degree)`
+This network has a total of `r ecount(rgraph)` edges. The network on the right has the nodes scaled such that larger nodes have a higher total degree. The node highlighted in yellow in the right has the highest total degree at `r max(vnet$nodes$degree)` (`r round((max(vnet$nodes$degree)/ecount(rgraph))*100, digits = 3)`% of all edges). The node(s) highlighted in grey has the lowest total degree at `r min(vnet$nodes$degree)`
 
 Network Viewer
 --------------------------------------------------------------------------------
@@ -317,7 +317,7 @@ Note that while there is a correlation between degree counts and mean geodesic d
 ```{r echo=FALSE}
 skim_without_charts(vnet$nodes$mean_geodist) %>% yank("numeric")
 ```
-The mean geodesic distance in this network is `r round(mean(nodes$mean_distance), digits = 3)`. The network on the right has the nodes scaled such that larger nodes have a **lower** mean geodesic distance. The node highlighted in yellow in the right has the lowest mean geodesic distance at `r min(nodes$mean_distance)`; it will usually be centrally located in the network. The grey node has the highest at `r max(nodes$mean_distance)`, and would need to travel through the whole network to reach the nodes on the opposite side.
+The mean geodesic distance in this network is `r round(mean(vnet$nodes$mean_geodist), digits = 3)`. The network on the right has the nodes scaled such that larger nodes have a **lower** mean geodesic distance. The node highlighted in yellow in the right has the lowest mean geodesic distance at `r round(min(vnet$nodes$mean_geodist), digits = 3)`; it will usually be centrally located in the network. The grey node has the highest at `r round(max(vnet$nodes$mean_geodist), digits = 3)`, and would need to travel through the whole network to reach the nodes on the opposite side.
 
 Network Viewer
 --------------------------------------------------------------------------------
@@ -370,7 +370,7 @@ Centrality scores such as this are usually normalized such that their scores all
 skim_without_charts(vnet$nodes$norm_betweenness) %>% yank("numeric")
 ```
 
-The mean betweenness centrality in this network is `r round(mean(nodes$norm_betweenness), digits = 3)`. The network on the right has the nodes scaled such that larger nodes have a larger betweenness centrality. The node highlighted in gold on the right has the largest betweenness centrality at `r max(nodes$norm_betweenness)`; this node likely acts as a gatekeeper in the network. Imagine this node were removed, how would resources need to flow differently in the network without it? The grey node has the smallest betweenness centrality at `r min(nodes$norm_betweenness)`; the network would likely be unaffected by their removal in terms of resource flows.  
+The mean betweenness centrality in this network is `r round(mean(vnet$nodes$norm_betweenness), digits = 3)`. The network on the right has the nodes scaled such that larger nodes have a larger betweenness centrality. The node highlighted in gold on the right has the largest betweenness centrality at `r round(max(vnet$nodes$norm_betweenness), digits = 3)`; this node likely acts as a gatekeeper in the network. Imagine this node were removed, how would resources need to flow differently in the network without it? The grey node has the smallest betweenness centrality at `r round(min(vnet$nodes$norm_betweenness), digits = 3)`; the network would likely be unaffected by their removal in terms of resource flows.  
 
 Betweenness Viewer
 --------------------------------------------------------------------------------
@@ -422,9 +422,9 @@ Eigenvector Text
 skim_without_charts(vnet$nodes$evc) %>% yank("numeric")
 ```
 
-The mean eigenvector centrality in this network is `r round(mean(nodes$evc), digits = 3)`. The network on the right has the nodes scaled such that larger nodes have a larger eigenvector centrality. The node highlighted in gold on the right has the largest eigenvector centrality at `r max(nodes$evc)`; this node may not be the most central node in the network, but it is connected to many important partners. The grey node has the smallest eigenvector centrality at `r min(nodes$evc)`.
+The mean eigenvector centrality in this network is `r round(mean(vnet$nodes$evc), digits = 3)`. The network on the right has the nodes scaled such that larger nodes have a larger eigenvector centrality. The node highlighted in gold on the right has the largest eigenvector centrality at `r round(max(vnet$nodes$evc), digits = 3)`; this node may not be the most central node in the network, but it is connected to many important partners. The grey node has the smallest eigenvector centrality at `r round(min(vnet$nodes$evc), digits = 3)`.
 
-This network has a eigenvector centralization of `r round(centralization(rgraph, evcent, mode = "graph"), digits = 3)`. Centralization is a measure of how unevenly node level metrics are distributed in a network. Scores closer to 0 mean the metric is evenly distributed, while scores closer to 1 indicate a concentration of the metric with a few nodes.
+This network has a eigenvector centralization of `r round(centralization.evcent(rgraph, directed = .directed, normalized = TRUE)$centralization, digits = 3)`. Centralization is a measure of how unevenly node level metrics are distributed in a network. Scores closer to 0 mean the metric is evenly distributed, while scores closer to 1 indicate a concentration of the metric with a few nodes.
 
 Eigenvector Viewer
 --------------------------------------------------------------------------------
