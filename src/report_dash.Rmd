@@ -35,7 +35,8 @@ opts_chunk$set(echo=TRUE,
                tidy=TRUE,
                comment=NA,
                message=FALSE,
-               warning=FALSE)
+               warning=FALSE,
+               fig.retina = 3)
 opts_knit$set(width=75)
 ```
 
