@@ -1,6 +1,17 @@
 # to prepare data for ingest into the social network report dashboard
 
+# This file will give you a template for the data expected by the network dash-
+# board. As your data matches the examples provided here, you should be able to
+# drop your data into the report without additional work. Keep in mind that you
+# may have to do some work to get your data into this expected format.
+
+# Additionally, you will need to denote some of the properties of the network
+# at the start of the report document, including a random seed, if the network
+# is directed, and if there are multiplex edges.
+
 # Setup ####
+
+# no packages needed
 
 # data in/out ####
 
@@ -24,6 +35,7 @@ edges = bis[bis$Source.Arrow != "",]
 # and clean
 edges = data.frame("from" = edges$Line.Source,
                   "to" = edges$Line.Destination,
+                  "weight" = NA,
                   "id" = edges$Id,
                   "type" = edges$Name,
                   stringsAsFactors = FALSE)
