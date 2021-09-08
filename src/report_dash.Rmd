@@ -50,7 +50,7 @@ rgraph = readRDS("./data/sample_net.rda")
 ## is this network multiplex?
 .multiplex = is.weighted(rgraph)
 ## is there a group in the nodes data?
-.groups = !is.null(V(rgraph)$group)
+.groups = (!is.null(V(rgraph)$group) && length(unique(V(rgraph)$group)) > 1)
 
 # largest component
 
@@ -278,7 +278,7 @@ Degree Text
 
 #### Description
 
-*Degree* counts how many edges are connected to a node. Degree gives a very rough measure of how popular or central a node is in the network. If a node has more ties, it may indicate that node as being more central or important in the network as a whole. Degree is a raw count of the number of edges a node has, this makes the interpretation of degree highly dependent on the size of the network. In a small network with only 25 total edges, having 10 of them would be significant. In a larger network with 250 total edges, 10 edges could be less impressive. Degree should thus be interpreted in the context of other nodes in the network. 
+**Degree** counts how many edges are connected to a node. Degree gives a very rough measure of how popular or central a node is in the network. If a node has more ties, it may indicate that node as being more central or important in the network as a whole. Degree is a raw count of the number of edges a node has, this makes the interpretation of degree highly dependent on the size of the network. In a small network with only 25 total edges, having 10 of them would be significant. In a larger network with 250 total edges, 10 edges could be less impressive. Degree should thus be interpreted in the context of other nodes in the network. 
 
 Degree count can be affected if the network is un-directed or directed; this network is `r ifelse(.directed, paste0("**directed**, so the following will apply"), paste0("**un-directed**, so the following will not apply"))`. If the network is directed there will be different counts for in-degree and out-degree. In-degree counts the number of edges a node is receiving, while out-degree counts the number of edges a node is sending. Total degree is the sum of these two numbers. If a node is receiving many edges but does not send any, this can be indicative of it's role in the network, though the meaning of this pattern will be specific to each case.
 
@@ -526,12 +526,21 @@ for(group in unique(vnet$nodes$group)){
 }
 ```
 
-
+This network has `r length(unique(vnet$nodes$group))` groups. You can see tables detailing the distribution of their network metrics above. If these groups have noticeably different distributions, it may be worth investigating why that is the case. 
 
 Groups Viewer
 --------------------------------------------------------------------------------
 
 ### Groups Network
+
+```{r echo=FALSE}
+group_net = vnet$nodes
+
+visNetwork(group_net, vnet$edges) %>%
+  visInteraction(zoomView = FALSE, dragView = FALSE) %>%
+  visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE, selectedBy = if(.groups){"group"} else {NULL}) %>%
+  visLayout(randomSeed = .seed)
+```
 
 ### Groups Plot
 
