@@ -30,7 +30,7 @@ library(igraph)
 
 ### Columns
 
-# id:     The unique identifier for the node
+# id:     (REQUIRED) The unique identifier for the node
 # group:  A categorical grouping of nodes
 # OTHER:  Other columns are currently ignored
 
@@ -57,8 +57,8 @@ nodes = nodes[order(nodes$id), ]
 # directed networks; if your network is un-directed, it does not matter.
 
 ### Columns
-# from:   Node id which is the source of connection
-# to:     Node id which is the end of connection
+# from:   (REQUIRED) Node id which is the source of connection
+# to:     (REQUIRED) Node id which is the end of connection
 # weight: Optional numeric weight denoting importance of connection (higher more important)
 # other:  Other columns currently ignored
 
@@ -71,14 +71,17 @@ edges = data.frame(
 ## Create igraph network ####
 
 # Once you have the two parts of your network, you can use them to create an
-# igraph network object. The example below creates an un-directed network.
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# igraph network object. The example below creates an un-directed network. If
+# you would want a directed network, change the argument `directed` below from
+# FALSE to TRUE. In a directed network, the sender and received of a connection
+# are distinct, like a follow on twitter. In contract, and un-directed network
+# treats all connections as mutual, like a friend on facebook. This will have
+# a significant effect on how things are measure in the report, so please
+# give thought to what you pick!
 
 sample_net = graph_from_data_frame(edges, vertices = nodes, directed = FALSE)
 
 # save ####
 
-# save out the data files. Make sire you keep row.names as FALSE, otherwise the
-# row numbers will supplant your IDs!
-
+# save out the network as a R data file.
 saveRDS(sample_net, "./data/sample_net.rda")
