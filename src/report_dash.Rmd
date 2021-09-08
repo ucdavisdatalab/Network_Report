@@ -49,6 +49,8 @@ rgraph = readRDS("./data/sample_net.rda")
 .directed = is.directed(rgraph)
 ## is this network multiplex?
 .multiplex = is.weighted(rgraph)
+## is there a group in the nodes data?
+.groups = !is.null(V(rgraph)$group)
 
 # largest component
 
@@ -226,6 +228,12 @@ overview_net$title = paste0("<table>",
                                 "<td>Node ID</td>",
                                 "<td>", overview_net$id, "</td>",
                               "</tr>",
+                              if(.groups){paste0(
+                                "<tr>",
+                                  "<td>Group</td>",
+                                  "<td>", overview_net$group, "</td>",
+                                "</tr>")
+                              },
                               "<tr>",
                                 "<td>Total Degree</td>",
                                 "<td>", round(overview_net$degree, digits = 3), "</td>",
@@ -256,7 +264,7 @@ overview_net$title = paste0("<table>",
 
 visNetwork(overview_net, vnet$edges) %>%
   visInteraction(zoomView = FALSE, dragView = FALSE) %>%
-  visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
+  visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE, selectedBy = if(.groups){"group"} else {NULL}) %>%
   visLayout(randomSeed = .seed)
 ```
 
