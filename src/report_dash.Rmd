@@ -8,7 +8,7 @@ output:
     source_code: embed
 #    theme: 
 #      version: 4
-#      bootswatch: yeti
+#      bootswatch: slate
 #    includes:
 #      after_body: footer.html
 bibliography: ../references.bib
@@ -280,13 +280,30 @@ Degree Text
 
 *Degree* counts how many edges are connected to a node. Degree gives a very rough measure of how popular or central a node is in the network. If a node has more ties, it may indicate that node as being more central or important in the network as a whole. Degree is a raw count of the number of edges a node has, this makes the interpretation of degree highly dependent on the size of the network. In a small network with only 25 total edges, having 10 of them would be significant. In a larger network with 250 total edges, 10 edges could be less impressive. Degree should thus be interpreted in the context of other nodes in the network. 
 
+Degree count can be affected if the network is un-directed or directed; this network is `r ifelse(.directed, paste0("**directed**, so the following will apply"), paste0("**un-directed**, so the following will not apply"))`. If the network is directed there will be different counts for in-degree and out-degree. In-degree counts the number of edges a node is receiving, while out-degree counts the number of edges a node is sending. Total degree is the sum of these two numbers. If a node is receiving many edges but does not send any, this can be indicative of it's role in the network, though the meaning of this pattern will be specific to each case.
+
 #### In This Network
 
 ```{r echo=FALSE}
 skim_without_charts(vnet$nodes$degree) %>% yank("numeric")
+if(.directed){
+  skim_without_charts(vnet$nodes$degree_in) %>% yank("numeric")
+  skim_without_charts(vnet$nodes$degree_out) %>% yank("numeric")
+}
 ```
 
-This network has a total of `r ecount(rgraph)` edges. The network on the right has the nodes scaled such that larger nodes have a higher total degree. The node highlighted in yellow in the right has the highest total degree at `r max(vnet$nodes$degree)` (`r round((max(vnet$nodes$degree)/ecount(rgraph))*100, digits = 3)`% of all edges). The node(s) highlighted in grey has the lowest total degree at `r min(vnet$nodes$degree)`
+`r if(.directed) {"<!--"}`
+
+This network is an un-directed network, meaning all edges are mutual. This network has a total of `r ecount(rgraph)` edges. The network on the right has the nodes scaled such that larger nodes have a higher total degree. The node highlighted in yellow in the right has the highest total degree at `r max(vnet$nodes$degree)` (`r round((max(vnet$nodes$degree)/ecount(rgraph))*100, digits = 3)`% of all edges). The node(s) highlighted in grey has the lowest total degree at `r min(vnet$nodes$degree)`
+
+`r if(.directed) {"-->"}`
+
+
+`r if(!.directed) {"<!--"}`
+
+This network is a directed network, meaning all edges are being sent by one node and received by another. This network has a total of `r ecount(rgraph)` edges. The network on the right has the nodes scaled such that larger nodes have a higher total degree. The node highlighted in yellow in the right has the highest total degree at `r max(vnet$nodes$degree)`, with an in-degree of `r vnet$nodes[which(vnet$nodes$degree == max(vnet$nodes$degree)), "degree_in"]` and an out-degree of `r vnet$nodes[which(vnet$nodes$degree == max(vnet$nodes$degree)), "degree_out"]`. The node(s) highlighted in grey has the lowest total degree at `r min(vnet$nodes$degree)`
+
+`r if(!.directed) {"-->"}`
 
 Network Viewer
 --------------------------------------------------------------------------------
@@ -478,12 +495,55 @@ visNetwork(evc_df, vnet$edges) %>%
 hist(vnet$nodes$evc, main = "Eigenvector Betweenness", xlab = "Node Eigenvector")
 ```
 
+`r if(!.groups) {"<!--"}`
+
+Groups
+================================================================================
+
+Groups Text
+--------------------------------------------------------------------------------
+
+### Groups Header
+
+#### Description
+
+One of the most useful aspects of network analysis is the ability to compare how different groups are positioned within a network. If one group has a significantly higher average degree for example, they would be involved in, and thus control over, more of the network compared to other groups. The plot on the right shows the nodes in your network with colors representing each group. You should inspect the plot visually to see if nodes of specific groups cluster together in some way (though note the layout of the graph is arbitrary).
+
+#### In This Network
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+
+for(group in unique(vnet$nodes$group)){
+  
+  cat(paste0("##### Group: ", group))
+  
+  if(.directed){
+    cat(knit_print(skim_without_charts(vnet$nodes[vnet$nodes$group == group,], c("degree", "degree_in", "degree_out", "mean_geodist", "norm_betweenness", "evc")) %>% yank("numeric")))
+  } else {
+    cat(knit_print(skim_without_charts(vnet$nodes[vnet$nodes$group == group,], c("degree", "mean_geodist", "norm_betweenness", "evc")) %>% yank("numeric")))
+    }
+  
+}
+```
+
+
+
+Groups Viewer
+--------------------------------------------------------------------------------
+
+### Groups Network
+
+### Groups Plot
+
+`r if(!.groups) {"-->"}`
 
 
 
 
 
 
+
+<!--
 
 Template
 ================================================================================
@@ -503,6 +563,10 @@ Template Viewer
 ### Degree Network
 
 ### Degree Plot
+
+-->
+
+
 
 
 
