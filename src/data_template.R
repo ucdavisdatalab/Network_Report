@@ -6,12 +6,11 @@
 # will need to do some work to get your data into this expected format.
 
 # Additionally, you will need to denote some of the properties of the network
-# at the start of the report document, including a random seed, if the network
-# is directed (WIP), and if there are multiplex edges (WIP).
+# at the start of the report document, including a random seed.
 
 # Setup ####
 
-# no packages needed
+library(igraph)
 
 # synthetic data generation ####
 
@@ -29,11 +28,21 @@
 
 # N.B. The first column MUST be named "id"
 
+### Columns
+
+# id:     The unique identifier for the node
+# group:  A categorical grouping of nodes
+# OTHER:  Other columns are currently ignored
+
 nodes = data.frame(
   "id" = c("Samantha Carter", "Alyx Vance", "Jesse Faden", "Ramona Flowers", "Ameiko Kaijitsu", "Paul Atreides", "Gordon Freeman", "Levi Ackerman", "Spike Spiegel", "Edward Elric"),
+  "group" = c("A", "B", "B", "A", "B", "A", "A", "B", "B", "A"),
   "age" = c(41, 24, 30, 24, 31, 33, 27, 33, 27, 18),
   "hair_color" = c("Blonde", "Black", "Red", "Varies", "Black", "Black", "Brown", "Black", "Green", "Blonde"),
   stringsAsFactors = FALSE)
+
+# sort alphabetically for easier navigation later
+nodes = nodes[order(nodes$id), ]
 
 ## Synthetic edgelist (edges) ####
 
@@ -42,10 +51,16 @@ nodes = data.frame(
 # the ids from the attribute file, you can start specifying other metadata.
 # You could include the "weight" or value of that tie, the type, or a time stamp.
 
-# N.B. The first column muse be names "from" and the second must be named "to"
+# N.B. The first column must be named "from" and the second must be named "to"
 # These values must match the "id" column in the attribute file. Connections
 # originate from the "from" node and go to the "to" node. This is important for
 # directed networks; if your network is un-directed, it does not matter.
+
+### Columns
+# from:   Node id which is the source of connection
+# to:     Node id which is the end of connection
+# weight: Optional numeric weight denoting importance of connection (higher more important)
+# other:  Other columns currently ignored
 
 edges = data.frame(
   "from" = c("Jesse Faden", "Levi Ackerman", "Samantha Carter", "Ameiko Kaijitsu", "Paul Atreides", "Levi Ackerman", "Alyx Vance", "Jesse Faden", "Ramona Flowers", "Gordon Freeman", "Alyx Vance", "Ramona Flowers", "Gordon Freeman", "Alyx Vance", "Jesse Faden"),
@@ -53,10 +68,17 @@ edges = data.frame(
   "weight" = c(1,5,2,7,3,1,6,8,3,1,5,7,2,5,5),
   stringsAsFactors = FALSE)
 
+## Create igraph network ####
+
+# Once you have the two parts of your network, you can use them to create an
+# igraph network object. The example below creates an un-directed network.
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+sample_net = graph_from_data_frame(edges, vertices = nodes, directed = FALSE)
+
 # save ####
 
 # save out the data files. Make sire you keep row.names as FALSE, otherwise the
 # row numbers will supplant your IDs!
 
-write.csv(nodes, "./data/nodes.csv", row.names = FALSE)
-write.csv(edges, "./data/edges.csv", row.names = FALSE)
+saveRDS(sample_net, "./data/sample_net.rda")
