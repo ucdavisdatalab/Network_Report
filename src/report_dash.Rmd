@@ -21,6 +21,7 @@ library(flexdashboard)
 library(knitr)
 library(visNetwork)
 library(skimr)
+library(ggplot2)
 # also need the emo package ( devtools::install_github("hadley/emo") )
 # also need reshape2 package
 # also need ggpubr package
@@ -551,7 +552,7 @@ visNetwork(group_net, vnet$edges) %>%
 
 ### Groups Plot
 
-```{r}
+```{r echo=FALSE}
 # melt the node attributes
 melt_nodes = reshape2::melt(vnet$nodes)
 # aggregate by group
