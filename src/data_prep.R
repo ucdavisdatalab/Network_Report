@@ -24,7 +24,7 @@ bis = read.csv("data/LG Network Map - Current Draft(1).csv", header = TRUE, stri
 # split nodes off
 nodes = bis[bis$Shape.Library != "", ]
 # and clean
-nodes = data.frame("id" = trimws(nodes$Id),
+nodes = data.frame("id" = trimws(paste0("node_", as.character(nodes$Id))),
                   "text" = substring(nodes$Text.Area.1,  16, 99999),
                   "text_id" = substring(nodes$Text.Area.1,  1, 14),
                   "type" = nodes$Name,
@@ -33,9 +33,9 @@ nodes = data.frame("id" = trimws(nodes$Id),
 # split edges off
 edges = bis[bis$Source.Arrow != "",]
 # and clean
-edges = data.frame("from" = edges$Line.Source,
-                  "to" = edges$Line.Destination,
-                  "weight" = NA,
+edges = data.frame("from" = paste0("node_", as.character(edges$Line.Source)),
+                  "to" = paste0("node_", as.character(edges$Line.Destination)),
+                  #"weight" = NA,
                   "id" = edges$Id,
                   "type" = edges$Name,
                   stringsAsFactors = FALSE)
