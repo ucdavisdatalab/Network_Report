@@ -22,6 +22,8 @@ library(knitr)
 library(visNetwork)
 library(skimr)
 # also need the emo package ( devtools::install_github("hadley/emo") )
+# also need reshape2 package
+# also need ggpubr package
 
 # options
 ## Set a random seed
@@ -43,7 +45,7 @@ opts_knit$set(width=75)
 ```{r data_load, include=FALSE}
 
 ## load in network
-rgraph = readRDS("./data/dl_net.rda")
+rgraph = readRDS("./data/sample_net.rda")
 
 ## is this network directed?
 .directed = is.directed(rgraph)
@@ -171,6 +173,7 @@ Explanation Text
 | Weighted Edges| `r ifelse(.multiplex, emo::ji("check"), emo::ji("x"))` |
 | Projected | PLACEHOLDER |
 | Density | `r round(edge_density(rgraph), digits = 3)` | 
+| Diameter | `r diameter(rgraph)` |
 | Degree Centralization  | `r round(centralization.degree(rgraph, mode = "all", normalized = TRUE)$centralization, digits = 3)` |
 | Betweenness Centralization | `r round(centralization.betweenness(rgraph, directed = .directed, normalized = TRUE)$centralization, digits = 3)` |
 | Eigenvector Centralization | `r round(centralization.evcent(rgraph, directed = .directed, normalized = TRUE)$centralization, digits = 3)` |
@@ -204,6 +207,10 @@ Often, you will not have individual level network data, but you will have data o
 *Density* is the first real graph level metric that helps you understand what is particular about the network you are looking at. The density of a network is a numerical score showing how many ties exist in a network, given the max possible in that network. Mathematically that is $\frac{Actual Edges}{Possible Edges}$, where actual edges is the number of edges in the network, and possible edges is the number of edges if every single node in the network was connected to every other node.
 
 Networks that are more densely connected are considered to be more cohesive and robust. This means that the removal of any specific edge or node will not have a great effect of the network as a whole. It also typically means that any one node in the network will be more likely to have access to whatever resources are in the network, as there are more potential connections in the network to search for resources.
+
+#### Diameter
+
+The **Diameter** of a network is the longest shortest path (geodiesic) in a network. Put another way, if you treated every node in a network as a starting point and tried to find the most distant other node in the network, that would be the diameter. The path between these two nodes are the longest "shortest path" because the path between them can't include unnecicary diversions like loops or backtracking. The diameter can be a helpful measure of network size and spartsity. If you compare two networks, both with 25 nodes, a network with a diameter of 5 will be much more tightly connected than a network with a diameter of 15.
 
 #### Centralization
 
@@ -543,6 +550,49 @@ visNetwork(group_net, vnet$edges) %>%
 ```
 
 ### Groups Plot
+
+```{r}
+# melt the node attributes
+melt_nodes = reshape2::melt(vnet$nodes)
+# aggregate by group
+melt_nodes = do.call(rbind, by(data = melt_nodes, INDICES = list(as.factor(melt_nodes$group), as.factor(melt_nodes$variable)), FUN = function(mes){
+  data.frame("group" = mes$group[1], "variable" = mes$variable[1], "value" = mean(mes$value), stringsAsFactors = FALSE)
+  }))
+
+# make plots for each network attribute
+
+## degree
+degree_bell = ggplot(melt_nodes[melt_nodes$variable == "degree",], aes(x=variable, y=value)) +
+  geom_segment(aes(x=variable, xend=variable, y=min(value), yend=max(value)), linetype="dashed", size=0.1) +   # Draw dashed lines
+  geom_point(aes(col=group), size=5) +   # Draw points
+  labs(title="Total Degree", subtitle=NULL, color = "Group") + xlab(NULL) + ylab("Mean Value") +
+  theme_classic(base_size = 12) + theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) + coord_flip()
+
+## mean_geodist
+gdist_bell = ggplot(melt_nodes[melt_nodes$variable == "mean_geodist",], aes(x=variable, y=value)) +
+  geom_segment(aes(x=variable, xend=variable, y=min(value), yend=max(value)), linetype="dashed", size=0.1) +   # Draw dashed lines
+  geom_point(aes(col=group), size=5) +   # Draw points
+  labs(title="Mean Geodesic Distance", subtitle=NULL, color = "Group") + xlab(NULL) + ylab("Mean Value") +
+  theme_classic(base_size = 12) + theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) + coord_flip()
+
+## norm_betweenness
+bet_bell = ggplot(melt_nodes[melt_nodes$variable == "norm_betweenness",], aes(x=variable, y=value)) +
+  geom_segment(aes(x=variable, xend=variable, y=min(value), yend=max(value)), linetype="dashed", size=0.1) +   # Draw dashed lines
+  geom_point(aes(col=group), size=5) +   # Draw points
+  labs(title="Norm Betweenness", subtitle=NULL, color = "Group") + xlab(NULL) + ylab("Mean Value") +
+  theme_classic(base_size = 12) + theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) + coord_flip()
+
+## eigenvector
+evc_bell = ggplot(melt_nodes[melt_nodes$variable == "evc",], aes(x=variable, y=value)) +
+  geom_segment(aes(x=variable, xend=variable, y=min(value), yend=max(value)), linetype="dashed", size=0.1) +   # Draw dashed lines
+  geom_point(aes(col=group), size=5) +   # Draw points
+  labs(title="Eigenvector", subtitle=NULL, color = "Group") + xlab(NULL) + ylab("Mean Value") +
+  theme_classic(base_size = 12) + theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) + coord_flip()
+
+# show combined plots
+ggpubr::ggarrange(degree_bell, gdist_bell, bet_bell, evc_bell, ncol = 1, nrow = 4)
+```
+
 
 `r if(!.groups) {"-->"}`
 
