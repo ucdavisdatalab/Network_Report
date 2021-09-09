@@ -36,7 +36,7 @@ library(igraph)
 
 nodes = data.frame(
   "id" = c("Samantha Carter", "Alyx Vance", "Jesse Faden", "Ramona Flowers", "Ameiko Kaijitsu", "Paul Atreides", "Gordon Freeman", "Levi Ackerman", "Spike Spiegel", "Edward Elric"),
-  "group" = c("A", "B", "B", "A", "B", "A", "A", "B", "B", "A"),
+  "group" = c("A", "B", "C", "A", "B", "C", "A", "B", "B", "A"),
   "age" = c(41, 24, 30, 24, 31, 33, 27, 33, 27, 18),
   "hair_color" = c("Blonde", "Black", "Red", "Varies", "Black", "Black", "Brown", "Black", "Green", "Blonde"),
   stringsAsFactors = FALSE)
@@ -59,7 +59,8 @@ nodes = nodes[order(nodes$id), ]
 ### Columns
 # from:   (REQUIRED) Node id which is the source of connection
 # to:     (REQUIRED) Node id which is the end of connection
-# weight: Optional numeric weight denoting importance of connection (higher more important)
+# weight: Optional numeric weight denoting importance of connection (higher
+#         more important). DO NOT INCLUDE if not important or all NAs.
 # other:  Other columns currently ignored
 
 edges = data.frame(
