@@ -24,7 +24,7 @@ bis = read.csv("data/LG Network Map - Current Draft(1).csv", header = TRUE, stri
 # split nodes off
 nodes = bis[bis$Shape.Library != "", ]
 # and clean
-nodes = data.frame("id" = nodes$Id,
+nodes = data.frame("id" = trimws(nodes$Id),
                   "text" = substring(nodes$Text.Area.1,  16, 99999),
                   "text_id" = substring(nodes$Text.Area.1,  1, 14),
                   "type" = nodes$Name,
@@ -40,6 +40,11 @@ edges = data.frame("from" = edges$Line.Source,
                   "type" = edges$Name,
                   stringsAsFactors = FALSE)
 
+sample_net = graph_from_data_frame(edges, vertices = nodes, directed = FALSE)
+
 # save ####
-write.csv(nodes, "./data/nodes.csv", row.names = FALSE)
-write.csv(edges, "./data/edges.csv", row.names = FALSE)
+
+# save out the network as a R data file.
+saveRDS(sample_net, "./data/dl_net.rda")
+
+

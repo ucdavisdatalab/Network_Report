@@ -43,7 +43,7 @@ opts_knit$set(width=75)
 ```{r data_load, include=FALSE}
 
 ## load in network
-rgraph = readRDS("./data/sample_net.rda")
+rgraph = readRDS("./data/dl_net.rda")
 
 ## is this network directed?
 .directed = is.directed(rgraph)
