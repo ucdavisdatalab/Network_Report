@@ -91,6 +91,8 @@ rgraph = set_vertex_attr(rgraph, "evc", value = evcent(rgraph, directed = .direc
 
 ## make visNetwork object for plotting
 vnet = visNetwork::toVisNetworkData(rgraph)
+# add edge weights
+vnet$edges$width = if(.multiplex){E(rgraph)$weight} else {NULL}
 
 ```
 
@@ -403,7 +405,7 @@ Betweenness
 Betweenness Text
 --------------------------------------------------------------------------------
 
-### Betweenness
+### Betweenness Measure
 
 #### Description
 
@@ -457,7 +459,7 @@ Eigenvector
 Eigenvector Text
 --------------------------------------------------------------------------------
 
-### Eigenvector Header
+### Eigenvector Measure
 
 #### Description
 
@@ -501,6 +503,76 @@ visNetwork(evc_df, vnet$edges) %>%
 
 ```{r echo=FALSE}
 hist(vnet$nodes$evc, main = "Eigenvector Betweenness", xlab = "Node Eigenvector")
+```
+
+
+Clusters
+================================================================================
+
+Clusters Text
+--------------------------------------------------------------------------------
+
+### Clusters & Communities
+
+#### Description
+
+#### In This Network
+
+Clusters Viewer {.tabset}
+--------------------------------------------------------------------------------
+
+### Edge Betweenness
+
+```{r echo=FALSE}
+bet_clust = cluster_edge_betweenness(rgraph, weights = if(.multiplex){E(rgraph)$weight} else {NA}, directed = .directed)
+```
+
+Betweenness tries to find the nodes that act as gatekeepers or bridges in a network. By gradually removing the edges with the highest betweenness, we can hierarchically see what clusters of nodes are most strongly densely connected with each other.
+
+#### Community Plot
+
+```{r echo=FALSE}
+plot(bet_clust, rgraph, edge.width = if(.multiplex){E(rgraph)$weight} else {NULL})
+```
+
+#### Community Dendrogram
+
+```{r echo=FALSE}
+plot_dendrogram(bet_clust)
+```
+
+### Fast Greedy
+
+```{r echo=FALSE}
+fast_clust = cluster_fast_greedy(rgraph, weights = if(.multiplex){E(rgraph)$weight} else {NULL})
+```
+
+"This function tries to find dense subgraph, also called communities in graphs via directly optimizing a modularity score."
+
+#### Community Plot
+
+```{r echo=FALSE}
+plot(fast_clust, rgraph, edge.width = if(.multiplex){E(rgraph)$weight} else {NULL})
+```
+
+#### Community Dendrogram
+
+```{r echo=FALSE}
+plot_dendrogram(fast_clust)
+```
+
+### Label Propagation
+
+```{r echo=FALSE}
+lab_clust = cluster_label_prop(rgraph, weights = if(.multiplex){E(rgraph)$weight} else {NA})
+```
+
+Label Propagation: "In our algorithm every node is initialized with a unique label and at every step each node adopts the label that most of its neighbors currently have. In this iterative process densely connected groups of nodes form a consensus on a unique label to form communities."
+
+#### Community Plot
+
+```{r echo=FALSE}
+plot(lab_clust, rgraph, edge.width = if(.multiplex){E(rgraph)$weight} else {NULL})
 ```
 
 `r if(!.groups) {"<!--"}`
