@@ -46,7 +46,7 @@ opts_knit$set(width=75)
 ```{r data_load, include=FALSE}
 
 ## load in network
-rgraph = readRDS("./data/sample_net.rda")
+rgraph = readRDS("./data/sample_net.rds")
 
 ## is this network directed?
 .directed = is.directed(rgraph)
@@ -141,7 +141,7 @@ Data Types {data-width=600}
 
 ### Example Network
 
-```{r echo=FALSE, out.width='100%'}
+```{r toy_net, echo=FALSE, out.width='100%'}
 .toy_nodes = data.frame(id = 1:4, 
                     shape = "image",
                     title = c("<p style='color: black;'>Name: J<br>Age: 30<br>Widgets: 1</p>", "<p style='color: black;'>Name: Y<br>Age: 21<br>Widgets: 3</p>", "<p style='color: black;'>Name: G<br>Age: 32<br>Widgets: 4</p>", "<p style='color: black;'>Name: Z<br>Age: 48<br>Widgets: 8</p>"),
@@ -213,7 +213,7 @@ Networks that are more densely connected are considered to be more cohesive and 
 
 #### Diameter
 
-The **Diameter** of a network is the longest shortest path (geodiesic) in a network. Put another way, if you treated every node in a network as a starting point and tried to find the most distant other node in the network, that would be the diameter. The path between these two nodes are the longest "shortest path" because the path between them can't include unnecicary diversions like loops or backtracking. The diameter can be a helpful measure of network size and spartsity. If you compare two networks, both with 25 nodes, a network with a diameter of 5 will be much more tightly connected than a network with a diameter of 15.
+The *Diameter* of a network is the longest shortest path (geodiesic) in a network. Put another way, if you treated every node in a network as a starting point and tried to find the most distant other node in the network, that would be the diameter. The path between these two nodes are the longest "shortest path" because the path between them can't include unnecicary diversions like loops or backtracking. The diameter can be a helpful measure of network size and spartsity. If you compare two networks, both with 25 nodes, a network with a diameter of 5 will be much more tightly connected than a network with a diameter of 15.
 
 #### Centralization
 
@@ -226,7 +226,7 @@ Network Viewer
 
 ### Network Overview
 
-```{r echo=FALSE}
+```{r overview_net, echo=FALSE}
 overview_net = vnet$nodes
 
 overview_net$title = paste0("<table>",
@@ -235,45 +235,45 @@ overview_net$title = paste0("<table>",
                                 "<th>Value</th>",
                               "</tr>",
                               "<tr>",
-                                "<td>Node ID</td>",
+                                "<td>Node ID </td>",
                                 "<td>", overview_net$id, "</td>",
                               "</tr>",
                               if(.groups){paste0(
                                 "<tr>",
-                                  "<td>Group</td>",
+                                  "<td>Group </td>",
                                   "<td>", overview_net$group, "</td>",
                                 "</tr>")
                               },
                               "<tr>",
-                                "<td>Total Degree</td>",
+                                "<td>Total Degree </td>",
                                 "<td>", round(overview_net$degree, digits = 3), "</td>",
                               "</tr>",
                               if(.directed){paste0(
                                 "<tr>",
-                                  "<td>Total In Degree</td>",
+                                  "<td>Total In Degree </td>",
                                   "<td>", round(overview_net$degree_in, digits = 3), "</td>",
                                 "</tr>",
                                 "<tr>",
-                                  "<td>Total Out Degree</td>",
+                                  "<td>Total Out Degree </td>",
                                   "<td>", round(overview_net$degree_out, digits = 3), "</td>",
                                 "</tr>")
                               },
                               "<tr>",
-                                "<td>Mean Geodesic Distance</td>",
+                                "<td>Mean Geodesic Distance </td>",
                                 "<td>", round(overview_net$mean_geodist, digits = 3), "</td>",
                               "</tr>",
                               "<tr>",
-                                "<td>Norm Betweenness Centrality</td>",
+                                "<td>Norm Betweenness Centrality </td>",
                                 "<td>", round(overview_net$norm_betweenness, digits = 3), "</td>",
                               "</tr>",
                               "<tr>",
-                                "<td>Eigenvector Centrality</td>",
+                                "<td>Eigenvector Centrality </td>",
                                 "<td>", round(overview_net$evc, digits = 3), "</td>",
                               "</tr>",
                             "</table>")
 
 visNetwork(overview_net, vnet$edges) %>%
-  visInteraction(zoomView = FALSE, dragView = FALSE) %>%
+  visInteraction(zoomView = TRUE, dragView = TRUE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE, selectedBy = if(.groups){"group"} else {NULL}) %>%
   visLayout(randomSeed = .seed)
 ```
@@ -294,7 +294,7 @@ Degree count can be affected if the network is un-directed or directed; this net
 
 #### In This Network
 
-```{r echo=FALSE}
+```{r degree_skim, echo=FALSE}
 skim_without_charts(vnet$nodes$degree) %>% yank("numeric")
 if(.directed){
   skim_without_charts(vnet$nodes$degree_in) %>% yank("numeric")
@@ -304,27 +304,85 @@ if(.directed){
 
 `r if(.directed) {"<!--"}`
 
-This network is an un-directed network, meaning all edges are mutual. This network has a total of `r ecount(rgraph)` edges. The network on the right has the nodes scaled such that larger nodes have a higher total degree. The node highlighted in yellow in the right has the highest total degree at `r max(vnet$nodes$degree)` (`r round((max(vnet$nodes$degree)/ecount(rgraph))*100, digits = 3)`% of all edges). The node(s) highlighted in grey has the lowest total degree at `r min(vnet$nodes$degree)`
+The network on the right has the nodes scaled such that larger nodes have a higher total degree. You can pan and zoom around the network to look at specific areas more closely. The node ID and total degree is displayed below a node. You can also use the drop-down in the upper left to find a specific node; nodes are in alphabetical order.
+
+This network is an un-directed network, meaning all edges are mutual, and has a total of `r ecount(rgraph)` edges. The node highlighted in yellow in the right has the highest total degree at `r max(vnet$nodes$degree)` (`r round((max(vnet$nodes$degree)/ecount(rgraph))*100, digits = 3)`% of all edges). The node(s) highlighted in grey has the lowest total degree at `r min(vnet$nodes$degree)`. The degree centralization of this network is `r round(centralization.degree(rgraph, mode = "all", normalized = TRUE)$centralization, digits = 3)`; recall that values closer to 0 indicate an egalitarian network, while values closer to 1 indicate a centralized network. 
 
 `r if(.directed) {"-->"}`
 
 
 `r if(!.directed) {"<!--"}`
 
-This network is a directed network, meaning all edges are being sent by one node and received by another. This network has a total of `r ecount(rgraph)` edges. The network on the right has the nodes scaled such that larger nodes have a higher total degree. The node highlighted in yellow in the right has the highest total degree at `r max(vnet$nodes$degree)`, with an in-degree of `r vnet$nodes[which(vnet$nodes$degree == max(vnet$nodes$degree)), "degree_in"]` and an out-degree of `r vnet$nodes[which(vnet$nodes$degree == max(vnet$nodes$degree)), "degree_out"]`. The node(s) highlighted in grey has the lowest total degree at `r min(vnet$nodes$degree)`
+The network on the right has the nodes scaled such that larger nodes have a higher total degree. You can pan and zoom around the network to look at specific areas more closely. The node ID and total degree is displayed below a node. You can also use the drop-down in the upper left to find a specific node; nodes are in alphabetical order.
+
+This network is a directed network, meaning all edges are being sent by one node and received by another. This network has a total of `r ecount(rgraph)` edges. You can hover over nodes to bring up a tooltip with their in and out degree scores. The node highlighted in yellow in the right has the highest total degree at `r max(vnet$nodes$degree)`, with an in-degree of `r vnet$nodes[which(vnet$nodes$degree == max(vnet$nodes$degree)), "degree_in"]` and an out-degree of `r vnet$nodes[which(vnet$nodes$degree == max(vnet$nodes$degree)), "degree_out"]`. The node(s) highlighted in grey has the lowest total degree at `r min(vnet$nodes$degree)`. The degree centralization of this network is `r round(centralization.degree(rgraph, mode = "all", normalized = TRUE)$centralization, digits = 3)`; recall that values closer to 0 indicate an egalitarian network, while values closer to 1 indicate a centralized network. 
 
 `r if(!.directed) {"-->"}`
+
+#### Degree Plot
+
+```{r degree_hist, echo=FALSE, out.width="100%"}
+ggplot(data = vnet$nodes, aes(x = degree)) +
+  geom_histogram() +
+  theme_minimal() +
+  xlab("Total Degree") + labs(title = "Node Total Degree")
+
+if(.directed){
+  
+  ggplot(data = vnet$nodes, aes(x = degree_in)) +
+  geom_histogram() +
+  theme_minimal() +
+  xlab("In Degree") + labs(title = "Node In Degree")
+  
+  ggplot(data = vnet$nodes, aes(x = degree_out)) +
+  geom_histogram() +
+  theme_minimal() +
+  xlab("Out Degree") + labs(title = "Node Out Degree")
+  
+}
+```
 
 Network Viewer
 --------------------------------------------------------------------------------
 
 ### Degree Network
 
-```{r echo=FALSE}
+```{r degree_net, echo=FALSE}
 # make dataframe for vis of degree
 degree_df = vnet$nodes
 degree_df$value = degree_df$degree ^ 2
 degree_df$color = "#355B85"
+
+# make hover tips
+if(.directed){
+  
+  degree_df$title = paste0("<table>",
+                              "<tr>",
+                                "<th>Measurement</th>",
+                                "<th>Value</th>",
+                              "</tr>",
+                              "<tr>",
+                                "<td>Node ID </td>",
+                                "<td>", overview_net$id, "</td>",
+                              "</tr>",
+                              "<tr>",
+                                "<td>Total Degree </td>",
+                                "<td>", round(overview_net$degree, digits = 3), "</td>",
+                              "</tr>",
+                              if(.directed){paste0(
+                                "<tr>",
+                                  "<td>Total In Degree </td>",
+                                  "<td>", round(overview_net$degree_in, digits = 3), "</td>",
+                                "</tr>",
+                                "<tr>",
+                                  "<td>Total Out Degree </td>",
+                                  "<td>", round(overview_net$degree_out, digits = 3), "</td>",
+                                "</tr>")
+                              },
+                            "</table>")
+  
+}
+
 
 # add color for largest node
 degree_df[which(max(degree_df$degree) == degree_df$degree), "color"] = "#FFBF00"
@@ -334,15 +392,9 @@ degree_df[which(min(degree_df$degree) == degree_df$degree), "color"] = "#CDD6E0"
 degree_df$label = paste0(degree_df$id, "\n", round(degree_df$degree, 3))
 
 visNetwork(degree_df, vnet$edges) %>%
-  visInteraction(zoomView = FALSE, dragView = FALSE) %>%
+  visInteraction(zoomView = TRUE, dragView = TRUE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
   visLayout(randomSeed = .seed)
-```
-
-### Degree Plot
-
-```{r echo=FALSE}
-hist(vnet$nodes$degree, main = "Degree Frequency", xlab = "Total Degree")
 ```
 
 Geodesic Distance
@@ -363,17 +415,29 @@ Note that while there is a correlation between degree counts and mean geodesic d
 
 #### In This Network
 
-```{r echo=FALSE}
+```{r geodesic_skim, echo=FALSE}
 skim_without_charts(vnet$nodes$mean_geodist) %>% yank("numeric")
 ```
-The mean geodesic distance in this network is `r round(mean(vnet$nodes$mean_geodist), digits = 3)`. The network on the right has the nodes scaled such that larger nodes have a **lower** mean geodesic distance. The node highlighted in yellow in the right has the lowest mean geodesic distance at `r round(min(vnet$nodes$mean_geodist), digits = 3)`; it will usually be centrally located in the network. The grey node has the highest at `r round(max(vnet$nodes$mean_geodist), digits = 3)`, and would need to travel through the whole network to reach the nodes on the opposite side.
+
+The network on the right has the nodes scaled such that larger nodes have a **lower** mean geodesic distance. You can pan and zoom around the network to look at specific areas more closely. The node ID and geodesic distance is displayed below a node. You can also use the drop-down in the upper left to find a specific node; nodes are in alphabetical order.
+
+The mean geodesic distance in this network is `r round(mean(vnet$nodes$mean_geodist), digits = 3)`. The node highlighted in yellow in the right has the lowest mean geodesic distance at `r round(min(vnet$nodes$mean_geodist), digits = 3)`; it will usually be centrally located in the network. The grey node has the highest at `r round(max(vnet$nodes$mean_geodist), digits = 3)`, and would need to travel through the whole network to reach the nodes on the opposite side.
+
+#### Geodesic Distance Plot
+
+```{r geodesic_hist, echo=FALSE, out.width="100%"}
+ggplot(data = vnet$nodes, aes(x = mean_geodist)) +
+  geom_histogram() +
+  theme_minimal() +
+  xlab("Geodesic Distance") + labs(title = "Node Geodesic Distance")
+```
 
 Network Viewer
 --------------------------------------------------------------------------------
 
 ### Geodesic Distance Network
 
-```{r Geodesic, echo=FALSE, message=FALSE, warning=FALSE}
+```{r Geodesic_net, echo=FALSE, message=FALSE, warning=FALSE}
 # make df to vis geodesic distances
 gdist_df = vnet$nodes
 gdist_df$value = (gdist_df$mean_geodist * -1)
@@ -388,15 +452,9 @@ gdist_df$label = paste0(gdist_df$id, "\n", round(gdist_df$mean_geodist, 3))
 
 # plot
 visNetwork(gdist_df, vnet$edges) %>%
-  visInteraction(zoomView = FALSE, dragView = FALSE) %>%
+  visInteraction(zoomView = TRUE, dragView = TRUE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
   visLayout(randomSeed = .seed)
-```
-
-### Geodesic Distance Plot
-
-```{r echo=FALSE}
-hist(vnet$nodes$mean_geodist, main = "Mean Geodesic Distance", xlab = "Geodesic Distance")
 ```
 
 Betweenness
@@ -415,18 +473,29 @@ Centrality scores such as this are usually normalized such that their scores all
 
 #### In This Network
 
-```{r echo=FALSE}
+```{r betweenness_skim, echo=FALSE}
 skim_without_charts(vnet$nodes$norm_betweenness) %>% yank("numeric")
 ```
 
-The mean betweenness centrality in this network is `r round(mean(vnet$nodes$norm_betweenness), digits = 3)`. The network on the right has the nodes scaled such that larger nodes have a larger betweenness centrality. The node highlighted in gold on the right has the largest betweenness centrality at `r round(max(vnet$nodes$norm_betweenness), digits = 3)`; this node likely acts as a gatekeeper in the network. Imagine this node were removed, how would resources need to flow differently in the network without it? The grey node has the smallest betweenness centrality at `r round(min(vnet$nodes$norm_betweenness), digits = 3)`; the network would likely be unaffected by their removal in terms of resource flows.  
+The network on the right has the nodes scaled such that larger nodes have a larger betweenness centrality. You can pan and zoom around the network to look at specific areas more closely. The node ID and betweenness centrality is displayed below a node. You can also use the drop-down in the upper left to find a specific node; nodes are in alphabetical order.
+
+The mean betweenness centrality in this network is `r round(mean(vnet$nodes$norm_betweenness), digits = 3)`. The node highlighted in gold on the right has the largest betweenness centrality at `r round(max(vnet$nodes$norm_betweenness), digits = 3)`; this node likely acts as a gatekeeper in the network. Imagine this node were removed, how would resources need to flow differently in the network without it? The grey node has the smallest betweenness centrality at `r round(min(vnet$nodes$norm_betweenness), digits = 3)`; the network would likely be unaffected by their removal in terms of resource flows.  
+
+#### Betweenness Plot
+
+```{r betweenness_hist, echo=FALSE, out.width="100%"}
+ggplot(data = vnet$nodes, aes(x = norm_betweenness)) +
+  geom_histogram() +
+  theme_minimal() +
+  xlab("Node Betweenness") + labs(title = "Node Normalized Betweenness")
+```
 
 Betweenness Viewer
 --------------------------------------------------------------------------------
 
 ### Betweenness Network
 
-```{r betweenness, echo=FALSE, message=FALSE, warning=FALSE}
+```{r betweenness_net, echo=FALSE, message=FALSE, warning=FALSE}
 
 bet_df = vnet$nodes
 bet_df$value = bet_df$norm_betweenness
@@ -442,15 +511,9 @@ bet_df$color[which(bet_df$norm_betweenness == min(bet_df$norm_betweenness))] = "
 
 # plot
 visNetwork(bet_df, vnet$edges) %>%
-  visInteraction(zoomView = FALSE, dragView = FALSE) %>%
+  visInteraction(zoomView = TRUE, dragView = TRUE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
   visLayout(randomSeed = .seed)
-```
-
-### Betweenness Plot
-
-```{r echo=FALSE}
-hist(vnet$nodes$norm_betweenness, main = "Normalized Betweenness", xlab = "Node Betweenness")
 ```
 
 Eigenvector
@@ -467,20 +530,31 @@ Eigenvector Text
 
 #### In This Network
 
-```{r echo=FALSE}
+```{r evc_skim, echo=FALSE}
 skim_without_charts(vnet$nodes$evc) %>% yank("numeric")
 ```
 
-The mean eigenvector centrality in this network is `r round(mean(vnet$nodes$evc), digits = 3)`. The network on the right has the nodes scaled such that larger nodes have a larger eigenvector centrality. The node highlighted in gold on the right has the largest eigenvector centrality at `r round(max(vnet$nodes$evc), digits = 3)`; this node may not be the most central node in the network, but it is connected to many important partners. The grey node has the smallest eigenvector centrality at `r round(min(vnet$nodes$evc), digits = 3)`.
+The network on the right has the nodes scaled such that larger nodes have a larger eigenvector centrality. You can pan and zoom around the network to look at specific areas more closely. The node ID and eigenvector centrality is displayed below a node. You can also use the drop-down in the upper left to find a specific node; nodes are in alphabetical order.
+
+The mean eigenvector centrality in this network is `r round(mean(vnet$nodes$evc), digits = 3)`. The node highlighted in gold on the right has the largest eigenvector centrality at `r round(max(vnet$nodes$evc), digits = 3)`; this node may not be the most central node in the network, but it is connected to many important partners. The grey node has the smallest eigenvector centrality at `r round(min(vnet$nodes$evc), digits = 3)`.
 
 This network has a eigenvector centralization of `r round(centralization.evcent(rgraph, directed = .directed, normalized = TRUE)$centralization, digits = 3)`. Centralization is a measure of how unevenly node level metrics are distributed in a network. Scores closer to 0 mean the metric is evenly distributed, while scores closer to 1 indicate a concentration of the metric with a few nodes.
+
+#### Eigenvector Plot
+
+```{r evc_hist, echo=FALSE, out.width="100%"}
+ggplot(data = vnet$nodes, aes(x = evc)) +
+  geom_histogram() +
+  theme_minimal() +
+  xlab("Node Eigenvector") + labs(title = "Node Eigenvector Betweenness")
+```
 
 Eigenvector Viewer
 --------------------------------------------------------------------------------
 
 ### Eigenvector Network
 
-```{r eigenvector, echo=FALSE, message=FALSE, warning=FALSE}
+```{r eigenvector_net, echo=FALSE, message=FALSE, warning=FALSE}
 evc_df = vnet$nodes
 evc_df$value = evc_df$evc
 evc_df$color = "#355B85"
@@ -494,20 +568,18 @@ evc_df$color[which(evc_df$evc == min(evc_df$evc))] = "#CDD6E0"
 
 # plot
 visNetwork(evc_df, vnet$edges) %>%
-  visInteraction(zoomView = FALSE, dragView = FALSE) %>%
+  visInteraction(zoomView = TRUE, dragView = TRUE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
   visLayout(randomSeed = .seed)
 ```
 
-### Eigenvector Plot
-
-```{r echo=FALSE}
-hist(vnet$nodes$evc, main = "Eigenvector Betweenness", xlab = "Node Eigenvector")
-```
-
-
 Clusters
 ================================================================================
+
+```{r cluster_label_calc, echo=FALSE}
+bet_clust = cluster_edge_betweenness(rgraph, weights = if(.multiplex){E(rgraph)$weight} else {NULL}, directed = .directed)
+lab_clust = cluster_label_prop(rgraph, weights = if(.multiplex){E(rgraph)$weight} else {NA})
+```
 
 Clusters Text
 --------------------------------------------------------------------------------
@@ -516,63 +588,65 @@ Clusters Text
 
 #### Description
 
+Most networks will have clusters of nodes within them. You may know of these clusters beforehand, or one of your questions may be to discover how nodes within your network group together. This tab shows some ways to detect clusters within your network. On the right are tabs for different clustering methods. Within each tab is a small description of how these clustering is performed, as well as plots for visualizing the clusters. The utility of these plots drops quickly as the network grows larger.
+
+Note that clustering is significantly impacted by weighted edges. Make sure you have applied or excluded weighted edges in a way that makes sense for your project.
+
 #### In This Network
+
+This network has `r length(bet_clust[])` clusters according to edge betweenness clustering, and `r length(lab_clust[])` clusters according to label propagation.
 
 Clusters Viewer {.tabset}
 --------------------------------------------------------------------------------
 
 ### Edge Betweenness
 
-```{r echo=FALSE}
-bet_clust = cluster_edge_betweenness(rgraph, weights = if(.multiplex){E(rgraph)$weight} else {NA}, directed = .directed)
-```
-
-Betweenness tries to find the nodes that act as gatekeepers or bridges in a network. By gradually removing the edges with the highest betweenness, we can hierarchically see what clusters of nodes are most strongly densely connected with each other.
+Betweenness tries to find the nodes that act as gatekeepers or bridges in a network. By gradually removing the edges with the highest betweenness, we can hierarchically see what clusters of nodes are most strongly densely connected with each other. Because this method of clustering is hierarchical, a node will belong in several clusters. 
 
 #### Community Plot
 
-```{r echo=FALSE}
+```{r cluster_edge_plot, echo=FALSE, out.width="100%"}
 plot(bet_clust, rgraph, edge.width = if(.multiplex){E(rgraph)$weight} else {NULL})
 ```
 
 #### Community Dendrogram
 
-```{r echo=FALSE}
+```{r cluster_edge_dendo, echo=FALSE, out.width="100%"}
 plot_dendrogram(bet_clust)
 ```
 
+<!--
+
 ### Fast Greedy
 
-```{r echo=FALSE}
-fast_clust = cluster_fast_greedy(rgraph, weights = if(.multiplex){E(rgraph)$weight} else {NULL})
+```{r cluster_fast_calc, echo=FALSE}
+#fast_clust = cluster_fast_greedy(rgraph, weights = if(.multiplex){E(rgraph)$weight} else {NULL})
 ```
 
 "This function tries to find dense subgraph, also called communities in graphs via directly optimizing a modularity score."
 
 #### Community Plot
 
-```{r echo=FALSE}
-plot(fast_clust, rgraph, edge.width = if(.multiplex){E(rgraph)$weight} else {NULL})
+```{r cluster_fast_plot, echo=FALSE, out.width="100%"}
+#plot(fast_clust, rgraph, edge.width = if(.multiplex){E(rgraph)$weight} else {NULL})
 ```
 
 #### Community Dendrogram
 
-```{r echo=FALSE}
-plot_dendrogram(fast_clust)
+```{r cluster_fast_dendo, echo=FALSE, out.width="100%"}
+#plot_dendrogram(fast_clust)
 ```
+
+-->
 
 ### Label Propagation
 
-```{r echo=FALSE}
-lab_clust = cluster_label_prop(rgraph, weights = if(.multiplex){E(rgraph)$weight} else {NA})
-```
-
-Label Propagation: "In our algorithm every node is initialized with a unique label and at every step each node adopts the label that most of its neighbors currently have. In this iterative process densely connected groups of nodes form a consensus on a unique label to form communities."
+Label Propagation: "In our algorithm every node is initialized with a unique label and at every step each node adopts the label that most of its neighbors currently have. In this iterative process densely connected groups of nodes form a consensus on a unique label to form communities." Label propagation is not a hierarchical method, meaning nodes here will only be counted in a single cluster.
 
 #### Community Plot
 
-```{r echo=FALSE}
-plot(lab_clust, rgraph, edge.width = if(.multiplex){E(rgraph)$weight} else {NULL})
+```{r cluster_label_plot, echo=FALSE, out.width="100%"}
+plot(lab_clust, rgraph, edge.width = if(.multiplex){E(rgraph)$weight} else {NULL}, rescale = TRUE)
 ```
 
 `r if(!.groups) {"<!--"}`
@@ -591,7 +665,7 @@ One of the most useful aspects of network analysis is the ability to compare how
 
 #### In This Network
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+```{r group_tables, echo=FALSE, message=FALSE, warning=FALSE, results='asis', eval=.groups}
 
 for(group in unique(vnet$nodes$group)){
   
@@ -613,18 +687,18 @@ Groups Viewer
 
 ### Groups Network
 
-```{r echo=FALSE}
+```{r group_net, echo=FALSE, eval=.groups}
 group_net = vnet$nodes
 
 visNetwork(group_net, vnet$edges) %>%
-  visInteraction(zoomView = FALSE, dragView = FALSE) %>%
+  visInteraction(zoomView = TRUE, dragView = TRUE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE, selectedBy = if(.groups){"group"} else {NULL}) %>%
   visLayout(randomSeed = .seed)
 ```
 
 ### Groups Plot
 
-```{r echo=FALSE}
+```{r group_plot, echo=FALSE, eval=.groups}
 # melt the node attributes
 melt_nodes = reshape2::melt(vnet$nodes)
 # aggregate by group

@@ -45,6 +45,6 @@ sample_net = graph_from_data_frame(edges, vertices = nodes, directed = FALSE)
 # save ####
 
 # save out the network as a R data file.
-saveRDS(sample_net, "./data/dl_net.rda")
+saveRDS(sample_net, "./data/dl_net.rds")
 
 

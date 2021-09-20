@@ -57,6 +57,7 @@ nodes = nodes[order(nodes$id), ]
 # directed networks; if your network is un-directed, it does not matter.
 
 ### Columns
+
 # from:   (REQUIRED) Node id which is the source of connection
 # to:     (REQUIRED) Node id which is the end of connection
 # weight: Optional numeric weight denoting importance of connection (higher
@@ -84,5 +85,8 @@ sample_net = graph_from_data_frame(edges, vertices = nodes, directed = FALSE)
 
 # save ####
 
+# The last step is to save out the network! This rda file will be what the
+# network report reads in. 
+
 # save out the network as a R data file.
-saveRDS(sample_net, "./data/sample_net.rda")
+saveRDS(sample_net, "./data/sample_net.rds")
