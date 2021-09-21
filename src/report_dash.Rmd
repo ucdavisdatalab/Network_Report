@@ -46,7 +46,7 @@ opts_knit$set(width=75)
 ```{r data_load, include=FALSE}
 
 ## load in network
-rgraph = readRDS("./data/sample_net.rds")
+rgraph = readRDS("./data/dl_net.rds")
 
 ## is this network directed?
 .directed = is.directed(rgraph)
@@ -153,6 +153,7 @@ Data Types {data-width=600}
   visNodes(shapeProperties = list(useBorderWithImage = FALSE), size = 50) %>%
   visEdges(length = 200, scaling = list(min = 400)) %>%
   visInteraction(zoomView = FALSE) %>%
+  visPhysics(solver = "barnesHut", maxVelocity = 50, minVelocity = 6) %>%
   visLayout(randomSeed = 2)
 
 .toy_net$sizingPolicy$browser$fill = TRUE
@@ -275,6 +276,7 @@ overview_net$title = paste0("<table>",
 visNetwork(overview_net, vnet$edges) %>%
   visInteraction(zoomView = TRUE, dragView = TRUE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE, selectedBy = if(.groups){"group"} else {NULL}) %>%
+  visPhysics(solver = "barnesHut", maxVelocity = 50, minVelocity = 6) %>%
   visLayout(randomSeed = .seed)
 ```
 
@@ -394,6 +396,7 @@ degree_df$label = paste0(degree_df$id, "\n", round(degree_df$degree, 3))
 visNetwork(degree_df, vnet$edges) %>%
   visInteraction(zoomView = TRUE, dragView = TRUE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
+  visPhysics(solver = "barnesHut", maxVelocity = 50, minVelocity = 6) %>%
   visLayout(randomSeed = .seed)
 ```
 
@@ -454,6 +457,7 @@ gdist_df$label = paste0(gdist_df$id, "\n", round(gdist_df$mean_geodist, 3))
 visNetwork(gdist_df, vnet$edges) %>%
   visInteraction(zoomView = TRUE, dragView = TRUE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
+  visPhysics(solver = "barnesHut", maxVelocity = 50, minVelocity = 6) %>%
   visLayout(randomSeed = .seed)
 ```
 
@@ -513,6 +517,7 @@ bet_df$color[which(bet_df$norm_betweenness == min(bet_df$norm_betweenness))] = "
 visNetwork(bet_df, vnet$edges) %>%
   visInteraction(zoomView = TRUE, dragView = TRUE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
+  visPhysics(solver = "barnesHut", maxVelocity = 50, minVelocity = 6) %>%
   visLayout(randomSeed = .seed)
 ```
 
@@ -570,6 +575,7 @@ evc_df$color[which(evc_df$evc == min(evc_df$evc))] = "#CDD6E0"
 visNetwork(evc_df, vnet$edges) %>%
   visInteraction(zoomView = TRUE, dragView = TRUE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
+  visPhysics(solver = "barnesHut", maxVelocity = 50, minVelocity = 6) %>%
   visLayout(randomSeed = .seed)
 ```
 
