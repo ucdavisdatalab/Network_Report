@@ -1,0 +1,71 @@
+---
+title: "UC Davis DataLab Network Report Prep"
+author: "Jared Joseph"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+link-citations: TRUE
+linkcolor: "myorange"
+urlcolor: "myorange"
+citecolor: "myorange"
+fontsize: 11pt
+geometry: margin=1in
+header-includes:
+  - \usepackage{setspace}\singlespacing
+  - \usepackage{wrapfig,lipsum,booktabs} # for floating tables
+#  - \setlength{\parindent}{3em}
+  - \setlength{\parskip}{1em}
+  - \usepackage[dvipsnames]{xcolor}
+  - \definecolor{myorange}{RGB}{255, 116, 0}
+  - \usepackage{titlesec}
+  - \titlespacing{\section}{0.5pt}{\parskip}{-\parskip}
+  - \titlespacing{\subsection}{0.5pt}{\parskip}{-\parskip}
+  - \titlespacing{\subsubsection}{0.5pt}{\parskip}{-\parskip}
+output:
+  pdf_document:
+    toc: FALSE
+    number_sections: FALSE
+    fig_caption: TRUE
+    fig_width: 10
+    fig_height: 6
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(fig.retina = 3)
+knitr::opts_chunk$set(fig.align = "center")
+```
+
+This report will walk you through the pre-requisite components for, and expected output of, the DataLab network report. If you have any questions while reading this document, please reach out to your DataLab contact or the [general email address](mailto:datalab@ucdavis.edu) for clarification. This is broken up into the following sections: 1) Is your question a network question? 2) Do you have network data? and 3) What can you expect from the network report? We will cover each of these topics in the remainder of this document.
+
+# Network Question
+
+The first thing to determine is if your question could be aided by a network approach. In the most general sense, network analysis aims to include the connection between entities as part of an analysis, rather than only looking at the entities of interest themselves. This can take many forms: social networks look at the connections between people, neuroscience can look at the connection between neurons, civil engineers may look at the transit routs between cities, etc. Regardless of the content of your network, as long as you have entities, called nodes in network nomenclature, and connections between them, called edges, you may be able to learn something new about your data from a network perspective.
+
+There are several avenues for learning from network analysis. You could glean insights from the network structure and how nodes occupy that structure, the edges that connect nodes within that structure, or the network metrics calculated for nodes using those edges. If at least one of the following sound interesting for your question, it may be worthwhile to explore network analysis more thoroughly. I will provide some examples here, but be aware this is the briefest of intros to an entire area of research.
+
+The structure of a network describes macro level information about the network as a whole, without considering any individual nodes. This includes the number of components, or disconnected groups, in your network. The presence or absence of these components give a clue to the cohesiveness of your network. The overall density of connections could give clues as to the purpose of a network; denser networks are better at conveying information, while more sparse networks can help protect secrecy. Meanwhile centralization measures can show if the network leans more egalitarian or centralized in terms of connections.
+
+The connections or edges in the network can start to shed light on how nodes and clusters of nodes interact in the network. If there is no direct path between two groups of nodes, it may be safe to assume they do not interact often. Conversely, you could observe densely connected clusters where all nodes are attached to each other (called cliques). These cliques are highly resistant to disruption given the redundant connections between members.
+
+Lastly, you can inspect how specific nodes or classes of nodes are positioned in the network. Using the number and pattern of edges in a network, node level metrics can be calculated which describe the position and importance of a node. If you think a node is important in a network, the metrics should help you test that theory. The same goes for if you beleive a specific type of node is important, or in some way different from other types of nodes.
+
+If any of these possibilities seem useful for you, hopefully the network report will help illuminate possible future directions.
+
+# Network Data
+
+The requirements for network analysis are different from other projects becasue it depends on the frequently overlooked or ignored connections between other peices of data. 
+
+
+
+
+* ask how large data is
+* directed?
+* multiplex?
+* specify what we want data to look like
+
+
+
+
+
+# Anticipated Return
+
