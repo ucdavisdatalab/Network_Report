@@ -3,29 +3,9 @@ title: "UC Davis DataLab Network Report Prep"
 author: "Jared Joseph"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 link-citations: TRUE
-linkcolor: "myorange"
-urlcolor: "myorange"
-citecolor: "myorange"
 fontsize: 11pt
 geometry: margin=1in
-header-includes:
-  - \usepackage{setspace}\singlespacing
-  - \usepackage{wrapfig,lipsum,booktabs} # for floating tables
-#  - \setlength{\parindent}{3em}
-  - \setlength{\parskip}{1em}
-  - \usepackage[dvipsnames]{xcolor}
-  - \definecolor{myorange}{RGB}{255, 116, 0}
-  - \usepackage{titlesec}
-  - \titlespacing{\section}{0.5pt}{\parskip}{-\parskip}
-  - \titlespacing{\subsection}{0.5pt}{\parskip}{-\parskip}
-  - \titlespacing{\subsubsection}{0.5pt}{\parskip}{-\parskip}
-output:
-  pdf_document:
-    toc: FALSE
-    number_sections: FALSE
-    fig_caption: TRUE
-    fig_width: 10
-    fig_height: 6
+output: word_document
 ---
 
 
@@ -47,25 +27,70 @@ The structure of a network describes macro level information about the network a
 
 The connections or edges in the network can start to shed light on how nodes and clusters of nodes interact in the network. If there is no direct path between two groups of nodes, it may be safe to assume they do not interact often. Conversely, you could observe densely connected clusters where all nodes are attached to each other (called cliques). These cliques are highly resistant to disruption given the redundant connections between members.
 
-Lastly, you can inspect how specific nodes or classes of nodes are positioned in the network. Using the number and pattern of edges in a network, node level metrics can be calculated which describe the position and importance of a node. If you think a node is important in a network, the metrics should help you test that theory. The same goes for if you beleive a specific type of node is important, or in some way different from other types of nodes.
+Lastly, you can inspect how specific nodes or classes of nodes are positioned in the network. Using the number and pattern of edges in a network, node level metrics can be calculated which describe the position and importance of a node. If you think a node is important in a network, the metrics should help you test that theory. The same goes for if you believe a specific type of node is important, or in some way different from other types of nodes.
 
-If any of these possibilities seem useful for you, hopefully the network report will help illuminate possible future directions.
+If any of these possibilities seem useful for you, hopefully the network report will help illuminate possible future directions. Please be prepared to discuss how a network approach can help your research problem when talking with DataLab staff.
 
 # Network Data
 
-The requirements for network analysis are different from other projects becasue it depends on the frequently overlooked or ignored connections between other peices of data. 
+Network analyses rely on two main data files, the attributes file which holds information about the nodes in your network, and the edgelist (or adjacency matrix) which denotes how those nodes are connected. The DataLab will need to know the approximate number of nodes in your network. The report is made to handle small to medium networks (up to a few hundred nodes), but more custom options can also be explored for larger networks. 
 
+Beyond these necessities, other qualities of the network must be known, such as if the network is multiplex (weighted), directed, or bipartite. I will briefly cover these topics here. Please check your data against these requirements to see if your project is ready to be handed over for a network report.
 
+## Attributes file
 
+Attribute files resemble most data files used for analysis. You have cases as the rows, and information about those cases in the columns. At a minimum, you must have a vector of unique IDs for nodes; you can optionally include group membership. Other information can be included, but by default it is not considered as part of the network report. An example of an attributes file is presented below.
 
-* ask how large data is
-* directed?
-* multiplex?
-* specify what we want data to look like
+| id              | group | age | hair_color |
+|-----------------|-------|-----|------------|
+| Alyx Vance      | B     | 24  | Black      |
+| Ameiko Kaijitsu | B     | 31  | Black      |
+| Edward Elric    | A     | 18  | Blonde     |
+| Gordon Freeman  | A     | 27  | Brown      |
+| Jesse Faden     | C     | 30  | Red        |
+| Levi Ackerman   | B     | 33  | Black      |
+| Paul Atreides   | C     | 33  | Black      |
+| Ramona Flowers  | A     | 24  | Varies     |
+| Samantha Carter | A     | 41  | Blonde     |
+| Spike Spiegel   | B     | 27  | Green      |
 
+## Edgelist (or Other)
 
+The second required component for network analyses is an edgelist (or equivalent). As long as it can be formatted to show connections from one node in your attributes file to another, it will work. The IDs here must match the IDs in your attributes file. If you only have anonymous nodes with no information attached to them, you can create an attributes file from an edgelist by taking all the unique node IDs.
 
+You can also optionally include a weight for the edges, with larger numbers indicating a stronger connection. This could be the number of times two nodes interact or the strength of their interaction. Just note that weighted edges and binary edges are treated differently in analyses, so the decision to include weighted edges should be made with a purpose in mind. You can see an example of an edgelist with weights below.
 
+| from            | to              | weight |
+|-----------------|-----------------|--------|
+| Jesse Faden     | Samantha Carter | 1      |
+| Levi Ackerman   | Samantha Carter | 5      |
+| Samantha Carter | Alyx Vance      | 2      |
+| Ameiko Kaijitsu | Levi Ackerman   | 7      |
+| Paul Atreides   | Alyx Vance      | 3      |
+| Levi Ackerman   | Jesse Faden     | 1      |
+| Alyx Vance      | Ramona Flowers  | 6      |
+| Jesse Faden     | Ameiko Kaijitsu | 8      |
+| Ramona Flowers  | Ameiko Kaijitsu | 3      |
+| Gordon Freeman  | Paul Atreides   | 1      |
+| Alyx Vance      | Gordon Freeman  | 5      |
+| Ramona Flowers  | Levi Ackerman   | 7      |
+| Gordon Freeman  | Spike Spiegel   | 2      |
+| Alyx Vance      | Spike Spiegel   | 5      |
+| Jesse Faden     | Edward Elric    | 5      |
+
+## Directed or Un-directed Networks
+
+Networks can either be directed or un-directed. A directed network treats the edges between nodes as having a specific direction of flow, while an un-directed network considers all edges to be mutual. In other words directed networks track which node is the source and which node is the receiver for an edge. Take for example the follow mechanic on Twitter. User A can follow User B, creating a directed edge from A to B, but B does not have to follow A in return. This can be useful when trying to understand the flows of resources that are finite such as money or goods. An un-directed network on the other hand treats all ties as mutual, such that A and B are both involved equally in a tie. An example is the friend mechanic on Facebook. Once a friendship is established, both users are considered equal in the tie. This can be helpful when you do not have information on what node initiates a tie, or when events happen equally to a group of nodes, such as all nodes being connected through co-membership in a group.
+
+Which of these will be useful to you will likely change from project to project. However, it is vital to understand what kind of network you are working with, as many network calculations we will talk about later change their behavior based on if the network is directed or not.
+
+Both edgelist and adjacency matrix datasets are inherently directed. For edgelists, the sender is often the first column, and the receiver is the second. For adjacency matrices the rows are considered senders and columns are receivers. Directionality is often specified when the network objects are created.
+
+## Bipartite / Projected Networks
+
+Often, you will not have node level network data, but you will have data on group membership. An easy example is having student rosters for a class, but no indication of which students actually interact. You may be able to use class rosters to build an approximate network. This is call a bipartite network, two-mode, or projected network.
+
+In a bipartite network there are two kinds of nodes, in our example students and classes. You can “collapse” this into a student network by assuming every student connected to a class is connected to each other. The same is true with classes, such that classes are related to each other if a single student is enrolled in both. This assumption may not always be correct, and you need to take care if you are going to make it in your research. If a class has 300 students, it is most likely not correct to assume every student knows every other student in that class.
 
 # Anticipated Return
 
