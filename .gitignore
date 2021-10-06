@@ -1,3 +1,8 @@
 data/*
 .Rproj.user
 .Rhistory
+
+*.docx
+*.tex
+*.log
+*.pdf
