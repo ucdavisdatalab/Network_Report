@@ -41,18 +41,18 @@ Beyond these necessities, other qualities of the network must be known, such as 
 
 Attribute files resemble most data files used for analysis. You have cases as the rows, and information about those cases in the columns. At a minimum, you must have a vector of unique IDs for nodes; you can optionally include group membership. Other information can be included, but by default it is not considered as part of the network report. An example of an attributes file is presented below.
 
-| id              | group | age | hair_color |
-|-----------------|-------|-----|------------|
-| Alyx Vance      | B     | 24  | Black      |
-| Ameiko Kaijitsu | B     | 31  | Black      |
-| Edward Elric    | A     | 18  | Blonde     |
-| Gordon Freeman  | A     | 27  | Brown      |
-| Jesse Faden     | C     | 30  | Red        |
-| Levi Ackerman   | B     | 33  | Black      |
-| Paul Atreides   | C     | 33  | Black      |
-| Ramona Flowers  | A     | 24  | Varies     |
-| Samantha Carter | A     | 41  | Blonde     |
-| Spike Spiegel   | B     | 27  | Green      |
+| **id**          | **group** | **age** | **hair_color** |
+|-----------------|-----------|---------|----------------|
+| Alyx Vance      | B         | 24      | Black          |
+| Ameiko Kaijitsu | B         | 31      | Black          |
+| Edward Elric    | A         | 18      | Blonde         |
+| Gordon Freeman  | A         | 27      | Brown          |
+| Jesse Faden     | C         | 30      | Red            |
+| Levi Ackerman   | B         | 33      | Black          |
+| Paul Atreides   | C         | 33      | Black          |
+| Ramona Flowers  | A         | 24      | Varies         |
+| Samantha Carter | A         | 41      | Blonde         |
+| Spike Spiegel   | B         | 27      | Green          |
 
 ## Edgelist (or Other)
 
@@ -60,23 +60,23 @@ The second required component for network analyses is an edgelist (or equivalent
 
 You can also optionally include a weight for the edges, with larger numbers indicating a stronger connection. This could be the number of times two nodes interact or the strength of their interaction. Just note that weighted edges and binary edges are treated differently in analyses, so the decision to include weighted edges should be made with a purpose in mind. You can see an example of an edgelist with weights below.
 
-| from            | to              | weight |
-|-----------------|-----------------|--------|
-| Jesse Faden     | Samantha Carter | 1      |
-| Levi Ackerman   | Samantha Carter | 5      |
-| Samantha Carter | Alyx Vance      | 2      |
-| Ameiko Kaijitsu | Levi Ackerman   | 7      |
-| Paul Atreides   | Alyx Vance      | 3      |
-| Levi Ackerman   | Jesse Faden     | 1      |
-| Alyx Vance      | Ramona Flowers  | 6      |
-| Jesse Faden     | Ameiko Kaijitsu | 8      |
-| Ramona Flowers  | Ameiko Kaijitsu | 3      |
-| Gordon Freeman  | Paul Atreides   | 1      |
-| Alyx Vance      | Gordon Freeman  | 5      |
-| Ramona Flowers  | Levi Ackerman   | 7      |
-| Gordon Freeman  | Spike Spiegel   | 2      |
-| Alyx Vance      | Spike Spiegel   | 5      |
-| Jesse Faden     | Edward Elric    | 5      |
+| **from**        | **to**          | **weight** |
+|-----------------|-----------------|------------|
+| Jesse Faden     | Samantha Carter | 1          |
+| Levi Ackerman   | Samantha Carter | 5          |
+| Samantha Carter | Alyx Vance      | 2          |
+| Ameiko Kaijitsu | Levi Ackerman   | 7          |
+| Paul Atreides   | Alyx Vance      | 3          |
+| Levi Ackerman   | Jesse Faden     | 1          |
+| Alyx Vance      | Ramona Flowers  | 6          |
+| Jesse Faden     | Ameiko Kaijitsu | 8          |
+| Ramona Flowers  | Ameiko Kaijitsu | 3          |
+| Gordon Freeman  | Paul Atreides   | 1          |
+| Alyx Vance      | Gordon Freeman  | 5          |
+| Ramona Flowers  | Levi Ackerman   | 7          |
+| Gordon Freeman  | Spike Spiegel   | 2          |
+| Alyx Vance      | Spike Spiegel   | 5          |
+| Jesse Faden     | Edward Elric    | 5          |
 
 ## Directed or Un-directed Networks
 
@@ -93,4 +93,31 @@ Often, you will not have node level network data, but you will have data on grou
 In a bipartite network there are two kinds of nodes, in our example students and classes. You can “collapse” this into a student network by assuming every student connected to a class is connected to each other. The same is true with classes, such that classes are related to each other if a single student is enrolled in both. This assumption may not always be correct, and you need to take care if you are going to make it in your research. If a class has 300 students, it is most likely not correct to assume every student knows every other student in that class.
 
 # Anticipated Return
+
+Once the report is finished two items will be returned to you: a copy of the formatted data used to create the network report, and the report itself. You can view the report html file locally using any modern web browser. Note that depending on the size of your network, you may need to allow a few seconds for the network visualizations to finish rendering. DUring that time the report may be slow to naviagate. It is reccomended you walk through the report with a DataLab staff member.
+
+The report will contain several tabs, each discussing a different topic. Each tab provides general information on network principles and metrics, how they apply to your network, and a visualization of the network related to the present topic. Not all tabs appear in every report, as they are dynamically generated based on the network provided.
+
+The "overview tab will give a brief overview of network concepts, most of which were discussed here. The "network metadata" tab will start to address your network, going over network level properties such as the number of nodes and edges, as well as the afromentioned directed and weighted options. It will also give network level metrics such as the density and centralization measures, along with an explanation of how to interpret these scores. A general network vidualization is also provided, with the ability to mouse over nodes and see more information about them. Please check over the information here for errors.
+
+From here we get into specific network metrics. There are tabs for degree, geodesic distances, betweenness and eigenvector centralities, and group comparisons (if provided). Each of these tabs will go over a different metric, what it means in the abstract, and what it looks like when applied to your network. The text is auto-generated, so it will not answer any specific you have, but should serve as a good launching point for seeing useful patters in your data.
+
+# Report Prep Checklist
+
+Please make sure your research question and data satisfies all these conditions before requesting a network report.
+
+1. The research question is relational in some way.
+2. The required data is ready to be sent to the DataLab to create a network dataset.
+3. Approximatly how large is your network?
+4. Is your network directional?
+5. Is your network weighted?
+6. Is your network projected?
+
+
+
+
+
+
+
+
 
