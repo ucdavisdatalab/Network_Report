@@ -46,7 +46,7 @@ opts_knit$set(width=75)
 ```{r data_load, include=FALSE}
 
 ## load in network
-rgraph = readRDS("./data/dl_net.rds")
+rgraph = readRDS("./data/sample_net.rds")
 
 ## is this network directed?
 .directed = is.directed(rgraph)
@@ -180,8 +180,8 @@ Explanation Text
 |:-|:-|
 | Nodes | `r vcount(rgraph)` |
 | Edges | `r ecount(rgraph)` | 
-| Components | `r ifelse(components(.bac_net)$no == 0, 0, paste0("<span style='color:red'>", components(.bac_net)$no, "</span>"))` | 
-| Isolates | `r ifelse(as.numeric(table(degree(.bac_net) == 0)["TRUE"]) == 0, 0, paste0("<span style='color:red'>", as.numeric(table(degree(.bac_net) == 0)["TRUE"]), "</span>"))` |
+| Components | `r ifelse(components(.bac_net)$no == 0, 0, paste0("<span style='color:red'><b>", components(.bac_net)$no, "</b></span>"))` | 
+| Isolates | `r ifelse(as.numeric(table(degree(.bac_net) == 0)["TRUE"]) == 0, 0, paste0("<span style='color:red'><b>", as.numeric(table(degree(.bac_net) == 0)["TRUE"]), "</b></span>"))` |
 | Directed | `r ifelse(.directed, emo::ji("check"), emo::ji("x"))` |
 | Weighted Edges| `r ifelse(.multiplex, emo::ji("check"), emo::ji("x"))` |
 | Projected | PLACEHOLDER |
@@ -199,10 +199,7 @@ This tab contains some meta-information about the network. This includes the num
 
 #### Components & Isolates 
 
-
-
-
-
+In network analysis lone nodes with no edges are called isolates, while clusters of disconnected nodes are called components. *This report works only on the largest single components from your dataset.* If you have multiple components in your data, make sure this is what you expect. Given many network metrics are based on the distances between nodes, completely isolated nodes result in infinite values. If you are interested in multiple components, please pass them through the report individually.
 
 #### Directed/Un-Directed
 
