@@ -54,6 +54,10 @@ rgraph = readRDS("./data/dl_net.rds")
 .multiplex = is.weighted(rgraph)
 ## is there a group in the nodes data?
 .groups = (!is.null(V(rgraph)$group) && length(unique(V(rgraph)$group)) > 1)
+# number of components
+.components = components(rgraph)$no
+# save total network
+.bac_net = rgraph
 
 # largest component
 
@@ -96,6 +100,9 @@ vnet$edges$width = if(.multiplex){E(rgraph)$weight} else {NULL}
 
 ```
 
+```{r data_checks, include=FALSE}
+
+```
 
 ```{r img_links, echo=FALSE}
 # emojis
@@ -173,6 +180,8 @@ Explanation Text
 |:-|:-|
 | Nodes | `r vcount(rgraph)` |
 | Edges | `r ecount(rgraph)` | 
+| Components | `r ifelse(components(.bac_net)$no == 0, 0, paste0("<span style='color:red'>", components(.bac_net)$no, "</span>"))` | 
+| Isolates | `r ifelse(as.numeric(table(degree(.bac_net) == 0)["TRUE"]) == 0, 0, paste0("<span style='color:red'>", as.numeric(table(degree(.bac_net) == 0)["TRUE"]), "</span>"))` |
 | Directed | `r ifelse(.directed, emo::ji("check"), emo::ji("x"))` |
 | Weighted Edges| `r ifelse(.multiplex, emo::ji("check"), emo::ji("x"))` |
 | Projected | PLACEHOLDER |
@@ -187,6 +196,13 @@ Explanation Text
 #### Overview
 
 This tab contains some meta-information about the network. This includes the number of nodes and edges, as well as more specialized characteristics and measures. The rest of this space is dedicated to explaining those things in a general way. If you would like to see more information about specific nodes in the network, you can hover over them on the right to see a tooltip about that node. You can also find nodes sorted alphabetically in the top left pull-down menu.
+
+#### Components & Isolates 
+
+
+
+
+
 
 #### Directed/Un-Directed
 
@@ -222,10 +238,10 @@ The *Diameter* of a network is the longest shortest path (geodiesic) in a networ
 
 Centralization is a measure of how unevenly node level metrics are distributed in a network. Scores closer to 0 mean the metric is evenly distributed, while scores closer to 1 indicate a concentration of the metric with a few nodes.
 
-Network Viewer
+Network Viewer {.tabset}
 --------------------------------------------------------------------------------
 
-### Network Overview
+### Largest Component Overview
 
 ```{r overview_net, echo=FALSE}
 overview_net = vnet$nodes
@@ -278,6 +294,12 @@ visNetwork(overview_net, vnet$edges) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE, selectedBy = if(.groups){"group"} else {NULL}) %>%
   visPhysics(solver = "barnesHut", maxVelocity = 50, minVelocity = 6) %>%
   visLayout(randomSeed = .seed)
+```
+
+### Component Checker
+
+```{r component_check, echo=FALSE}
+plot(.bac_net, layout = layout_with_drl(.bac_net))
 ```
 
 Degree
