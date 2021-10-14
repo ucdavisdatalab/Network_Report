@@ -111,7 +111,7 @@ vnet$edges$width = if(.multiplex){E(rgraph)$weight} else {NULL}
 .warm = any(
   .component_num > 1, # more than one component
   length(boxplot.stats(vnet$nodes$degree)$out) > 0, # total degree outliers
-  length(boxplot.stats(vnet$nodes$mean_geodist)$out) > 0 # geodesic distance outliers
+  !is.na(table(unique(c(vnet$edges$from, vnet$edges$to)) %in% vnet$nodes$id)["FALSE"]) # check if any nodes in edges missing from attributes
   )
 ```
 
@@ -133,7 +133,6 @@ Welcome! {data-width=400}
 
 Report generated: `r format(Sys.time(), '%B %d, %Y')`
 
-
 `r if(!.warm) {"<!--"}`
 
 <div style="background:#fcc15a;">
@@ -145,6 +144,8 @@ Report generated: `r format(Sys.time(), '%B %d, %Y')`
 `r if(.component_num > 1){paste("* There are multiple components in the network supplied. Be aware that only the largest component is used for analyses.")}`
 
 `r if(length(boxplot.stats(vnet$nodes$degree)$out) > 0){paste("* There are outliers in the total degree score of nodes.")}`
+
+`r if(!is.na(table(unique(c(vnet$edges$from, vnet$edges$to)) %in% vnet$nodes$id)["FALSE"])){paste("* There are nodes in the edges data with no corresponding node in the attributes data.")}`
 
 </div>
 
