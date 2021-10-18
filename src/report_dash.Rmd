@@ -34,6 +34,16 @@ library(ggplot2)
 # set color pal
 .pal = RColorBrewer::brewer.pal(8, "Dark2")
 
+# if you would like a custom column to show in node tooltips, please indicate that here
+# the format should be a named list, with the title as the name.
+# for example c("Title of Value" = "Column name in dataframe")
+
+custom_tooltips = list("Question" = "text", "Type" = "type")
+
+# if you do not have any custom data, please include this
+
+# .custom_tooltips = NA
+
 # knitr options
 options(max.print="75")
 opts_chunk$set(echo=TRUE,
@@ -103,6 +113,33 @@ rgraph = set_vertex_attr(rgraph, "evc", value = evcent(rgraph, directed = .direc
 vnet = visNetwork::toVisNetworkData(rgraph)
 # add edge weights
 vnet$edges$width = if(.multiplex){E(rgraph)$weight} else {NULL}
+
+# custom tooltips
+## deal with custom tooltips if any set
+
+## take values from data
+custom_tooltips = lapply(seq_along(custom_tooltips), FUN = function(i){
+  
+  eval(parse(text = paste0(
+    "list('", names(custom_tooltips)[[i]], "' = vnet$nodes[,custom_tooltips[[i]]] )"
+  )))
+  
+})
+
+# unlist it
+custom_tooltips = unlist(custom_tooltips, recursive = FALSE)
+
+## format them as html
+custom_tooltips = lapply(seq_along(custom_tooltips), function(i){
+  
+  paste0(
+    "<tr>",
+    "<td>", names(custom_tooltips)[[i]], " </td>",
+    "<td>", custom_tooltips[[i]], "</td>",
+    "</tr>"
+  )
+  
+  })
 
 ```
 
@@ -313,6 +350,9 @@ overview_net$title = paste0("<table>",
                                 "<td>Eigenvector Centrality </td>",
                                 "<td>", round(overview_net$evc, digits = 3), "</td>",
                               "</tr>",
+                            if(all(!is.na(custom_tooltips))){
+                              
+                            }
                             "</table>")
 
 visNetwork(overview_net, vnet$edges) %>%
