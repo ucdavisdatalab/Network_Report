@@ -133,24 +133,6 @@ Welcome! {data-width=400}
 
 Report generated: `r format(Sys.time(), '%B %d, %Y')`
 
-`r if(!.warm) {"<!--"}`
-
-<div style="background:#fcc15a;">
-
-#### WARNING
-
-**Some data concerns were detected when creating this report. Please check the following to make sure everything is alright.**
-
-`r if(.component_num > 1){paste("* There are multiple components in the network supplied. Be aware that only the largest component is used for analyses.")}`
-
-`r if(length(boxplot.stats(vnet$nodes$degree)$out) > 0){paste("* There are outliers in the total degree score of nodes.")}`
-
-`r if(!is.na(table(unique(c(vnet$edges$from, vnet$edges$to)) %in% vnet$nodes$id)["FALSE"])){paste("* There are nodes in the edges data with no corresponding node in the attributes data.")}`
-
-</div>
-
-`r if(!.warm) {"-->"}`
-
 #### Report Introduction
 
 This report will ingest pre-formatted network data and walk readers through some preliminary network metrics. All of the text in this report is generalized to any network it could render; it is not specific to the data displayed. Because of this, some metrics may not be relevant to a specific data set. Please talk with the DataLab about the outcomes of this report for help with interpretation and applications of these outcomes.
@@ -221,6 +203,24 @@ Explanation Text
 | Eigenvector Centralization | `r round(centralization.evcent(rgraph, directed = .directed, normalized = TRUE)$centralization, digits = 3)` |
 
 ### Explanations
+
+`r if(!.warm) {"<!--"}`
+
+<div style="background:#fcc15a;">
+
+#### WARNING
+
+**Some data concerns were detected when creating this report. Please check the following to make sure everything is alright.**
+
+`r if(.component_num > 1){paste("* There are multiple components in the network supplied. Be aware that only the largest component is used for analyses.")}`
+
+`r if(length(boxplot.stats(vnet$nodes$degree)$out) > 0){paste("* There are outliers in the total degree score of nodes.")}`
+
+`r if(!is.na(table(unique(c(vnet$edges$from, vnet$edges$to)) %in% vnet$nodes$id)["FALSE"])){paste("* There are nodes in the edges data with no corresponding node in the attributes data.")}`
+
+</div>
+
+`r if(!.warm) {"-->"}`
 
 #### Overview
 
