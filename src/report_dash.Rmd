@@ -351,8 +351,8 @@ overview_net$title = paste0("<table>",
                                 "<td>", round(overview_net$evc, digits = 3), "</td>",
                               "</tr>",
                             if(all(!is.na(custom_tooltips))){
-                              
-                            }
+                              apply(data.frame(custom_tooltips, stringsAsFactors = FALSE), 1, FUN = function(trow){paste(trow, collapse = " ")})
+                            },
                             "</table>")
 
 visNetwork(overview_net, vnet$edges) %>%
