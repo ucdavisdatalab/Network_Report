@@ -40,11 +40,11 @@ edges = data.frame("from" = paste0("node_", as.character(edges$Line.Source)),
                   "type" = edges$Name,
                   stringsAsFactors = FALSE)
 
-sample_net = graph_from_data_frame(edges, vertices = nodes, directed = FALSE)
+sample_net = igraph::graph_from_data_frame(edges, vertices = nodes, directed = FALSE)
 
 # save ####
 
 # save out the network as a R data file.
-saveRDS(sample_net, "./data/dl_net.rds")
+saveRDS(sample_net, "./data/bis2a_net.rds")
 
 
