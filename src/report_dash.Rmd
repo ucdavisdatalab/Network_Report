@@ -4,8 +4,8 @@ output:
   flexdashboard::flex_dashboard:
     orientation: columns
     vertical_layout: fill
-    social: menu
     source_code: embed
+    logo: ../img/dl_logo.png
 #    theme: 
 #      version: 4
 #      bootswatch: slate
@@ -60,7 +60,7 @@ opts_knit$set(width=75)
 ```{r data_load, include=FALSE}
 
 ## load in network
-rgraph = readRDS("./data/dl_net.rds")
+rgraph = readRDS("./data/bis2a_net.rds")
 
 ## is this network directed?
 .directed = is.directed(rgraph)
@@ -146,9 +146,12 @@ custom_tooltips = lapply(seq_along(custom_tooltips), function(i){
 ```{r data_checks, include=FALSE}
 # if any of these are true, add in the warning box
 .warm = any(
-  .component_num > 1, # more than one component
-  length(boxplot.stats(vnet$nodes$degree)$out) > 0, # total degree outliers
-  !is.na(table(unique(c(vnet$edges$from, vnet$edges$to)) %in% vnet$nodes$id)["FALSE"]) # check if any nodes in edges missing from attributes
+  # more than one component
+  .component_num > 1,
+  # total degree outliers
+  length(boxplot.stats(vnet$nodes$degree)$out) > 0,
+  # check if any nodes in edges missing from attributes
+  !is.na(table(unique(c(vnet$edges$from, vnet$edges$to)) %in% vnet$nodes$id)["FALSE"])
   )
 ```
 
@@ -232,7 +235,6 @@ Explanation Text
 | Isolates | `r ifelse(as.numeric(table(degree(.bac_net) == 0)["TRUE"]) == 0, 0, paste0("<span style='color:red'><b>", as.numeric(table(degree(.bac_net) == 0)["TRUE"]), "</b></span>"))` |
 | Directed | `r ifelse(.directed, emo::ji("check"), emo::ji("x"))` |
 | Weighted Edges| `r ifelse(.multiplex, emo::ji("check"), emo::ji("x"))` |
-| Projected | PLACEHOLDER |
 | Density | `r round(edge_density(rgraph), digits = 3)` | 
 | Diameter | `r diameter(rgraph)` |
 | Degree Centralization  | `r round(centralization.degree(rgraph, mode = "all", normalized = TRUE)$centralization, digits = 3)` |
