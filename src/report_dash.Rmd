@@ -395,8 +395,7 @@ overview_net$title = paste0("<table>",
 visNetwork(overview_net, vnet$edges) %>%
   visInteraction(zoomView = TRUE, dragView = TRUE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE, selectedBy = if(.groups){"group"} else {NULL}) %>%
-  visPhysics(solver = "barnesHut", maxVelocity = 50, minVelocity = 6) %>%
-  visLayout(randomSeed = .seed, improvedLayout = FALSE)
+  visIgraphLayout(physics = TRUE, randomSeed = .seed)
 ```
 
 ### Component Checker
@@ -527,8 +526,7 @@ degree_df$label = paste0(degree_df$id, "\n", round(degree_df$degree, 3))
 visNetwork(degree_df, vnet$edges) %>%
   visInteraction(zoomView = TRUE, dragView = TRUE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
-  visPhysics(solver = "barnesHut", maxVelocity = 50, minVelocity = 6) %>%
-  visLayout(randomSeed = .seed, improvedLayout = FALSE)
+  visIgraphLayout(physics = TRUE, randomSeed = .seed)
 ```
 
 Geodesic Distance
@@ -588,8 +586,7 @@ gdist_df$label = paste0(gdist_df$id, "\n", round(gdist_df$mean_geodist, 3))
 visNetwork(gdist_df, vnet$edges) %>%
   visInteraction(zoomView = TRUE, dragView = TRUE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
-  visPhysics(solver = "barnesHut", maxVelocity = 50, minVelocity = 6) %>%
-  visLayout(randomSeed = .seed, improvedLayout = FALSE)
+  visIgraphLayout(physics = TRUE, randomSeed = .seed)
 ```
 
 Betweenness
@@ -648,8 +645,7 @@ bet_df$color[which(bet_df$norm_betweenness == min(bet_df$norm_betweenness))] = "
 visNetwork(bet_df, vnet$edges) %>%
   visInteraction(zoomView = TRUE, dragView = TRUE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
-  visPhysics(solver = "barnesHut", maxVelocity = 50, minVelocity = 6) %>%
-  visLayout(randomSeed = .seed, improvedLayout = FALSE)
+  visIgraphLayout(physics = TRUE, randomSeed = .seed)
 ```
 
 Eigenvector
@@ -706,8 +702,7 @@ evc_df$color[which(evc_df$evc == min(evc_df$evc))] = "#CDD6E0"
 visNetwork(evc_df, vnet$edges) %>%
   visInteraction(zoomView = TRUE, dragView = TRUE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
-  visPhysics(solver = "barnesHut", maxVelocity = 50, minVelocity = 6) %>%
-  visLayout(randomSeed = .seed, improvedLayout = FALSE)
+  visIgraphLayout(physics = TRUE, randomSeed = .seed)
 ```
 
 Clusters
@@ -830,7 +825,7 @@ group_net = vnet$nodes
 visNetwork(group_net, vnet$edges) %>%
   visInteraction(zoomView = TRUE, dragView = TRUE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE, selectedBy = if(.groups){"group"} else {NULL}) %>%
-  visLayout(randomSeed = .seed, improvedLayout = FALSE)
+  visIgraphLayout(physics = TRUE, randomSeed = .seed)
 ```
 
 ### Groups Plot
