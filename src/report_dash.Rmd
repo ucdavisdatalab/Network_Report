@@ -155,6 +155,12 @@ custom_tooltips = lapply(seq_along(custom_tooltips), function(i){
   )
 ```
 
+```{js, include=FALSE}
+document.getElementsByClassName('navbar-logo')[0].onclick = function(){
+   location.href= 'https://datalab.ucdavis.edu/'
+}
+```
+
 ```{r img_links, echo=FALSE}
 # emojis
 .net_url1 = "../img/male-teacher_emoji.png"
