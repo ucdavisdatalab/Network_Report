@@ -38,11 +38,11 @@ library(ggplot2)
 # the format should be a named list, with the title as the name.
 # for example c("Title of Value" = "Column name in dataframe")
 
-custom_tooltips = list("Question" = "text", "Type" = "type")
+#custom_tooltips = list("Question" = "text", "Type" = "type")
 
 # if you do not have any custom data, please include this
 
-# .custom_tooltips = NA
+custom_tooltips = NA
 
 # Parter Info
 
@@ -66,9 +66,8 @@ opts_knit$set(width=75)
 ```
 
 ```{r data_load, include=FALSE}
-
 ## load in network
-rgraph = readRDS("./data/bis2a_net.rds")
+rgraph = readRDS("./data/sample_net.rds")
 
 ## is this network directed?
 .directed = is.directed(rgraph)
@@ -82,7 +81,13 @@ if(.groups){rgraph = set_vertex_attr(rgraph, "color", value = .pal[as.factor(V(r
 .component_num = components(rgraph)$no
 # save total network
 .bac_net = rgraph
+```
 
+```{r custom_errors, include=FALSE}
+if(any(is.na(E(rgraph)$weight))){stop("The network is weighted, but there is an NA in weights. This will cause a fatal error later.")}
+```
+
+```{r data_edit, include=FALSE}
 # largest component
 
 ## find ids of nodes in largest component
@@ -125,7 +130,9 @@ vnet$edges$width = if(.multiplex){E(rgraph)$weight} else {NULL}
 # custom tooltips
 ## deal with custom tooltips if any set
 
-## take values from data
+if(!is.na(custom_tooltips)){
+  
+  ## take values from data
 custom_tooltips = lapply(seq_along(custom_tooltips), FUN = function(i){
   
   eval(parse(text = paste0(
@@ -148,6 +155,7 @@ custom_tooltips = lapply(seq_along(custom_tooltips), function(i){
   )
   
   })
+}
 
 ```
 
