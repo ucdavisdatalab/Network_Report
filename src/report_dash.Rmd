@@ -891,7 +891,15 @@ DataLab {data-width=600}
 
 ### About
 
-This report was coded by [Jared Joseph](https://jnjoseph.com/) for the [UC Davis DataLab](https://datalab.ucdavis.edu/); I hope you found it useful! 
+This report was coded by [Jared Joseph](https://jnjoseph.com/) for the [UC Davis DataLab](https://datalab.ucdavis.edu/); I hope you found it useful! If you have any questions, [please send an email to the DataLab](mailto:datalab@ucdavis.edu) and we'll get back to you!
+
+### Session Info
+
+Here is the session info of the instance that generated this report:
+
+```{r}
+sessionInfo()
+```
 
 References {data-width=400}
 --------------------------------------------------------------------------------
