@@ -67,7 +67,7 @@ opts_knit$set(width=75)
 
 ```{r data_load, include=FALSE}
 ## load in network
-rgraph = readRDS("./data/sample_net.rds")
+rgraph = readRDS("./data/bis2a_net.rds")
 
 ## is this network directed?
 .directed = is.directed(rgraph)
@@ -396,7 +396,7 @@ visNetwork(overview_net, vnet$edges) %>%
   visInteraction(zoomView = TRUE, dragView = TRUE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE, selectedBy = if(.groups){"group"} else {NULL}) %>%
   visPhysics(solver = "barnesHut", maxVelocity = 50, minVelocity = 6) %>%
-  visLayout(randomSeed = .seed)
+  visLayout(randomSeed = .seed, improvedLayout = FALSE)
 ```
 
 ### Component Checker
@@ -528,7 +528,7 @@ visNetwork(degree_df, vnet$edges) %>%
   visInteraction(zoomView = TRUE, dragView = TRUE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
   visPhysics(solver = "barnesHut", maxVelocity = 50, minVelocity = 6) %>%
-  visLayout(randomSeed = .seed)
+  visLayout(randomSeed = .seed, improvedLayout = FALSE)
 ```
 
 Geodesic Distance
@@ -589,7 +589,7 @@ visNetwork(gdist_df, vnet$edges) %>%
   visInteraction(zoomView = TRUE, dragView = TRUE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
   visPhysics(solver = "barnesHut", maxVelocity = 50, minVelocity = 6) %>%
-  visLayout(randomSeed = .seed)
+  visLayout(randomSeed = .seed, improvedLayout = FALSE)
 ```
 
 Betweenness
@@ -649,7 +649,7 @@ visNetwork(bet_df, vnet$edges) %>%
   visInteraction(zoomView = TRUE, dragView = TRUE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
   visPhysics(solver = "barnesHut", maxVelocity = 50, minVelocity = 6) %>%
-  visLayout(randomSeed = .seed)
+  visLayout(randomSeed = .seed, improvedLayout = FALSE)
 ```
 
 Eigenvector
@@ -707,7 +707,7 @@ visNetwork(evc_df, vnet$edges) %>%
   visInteraction(zoomView = TRUE, dragView = TRUE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
   visPhysics(solver = "barnesHut", maxVelocity = 50, minVelocity = 6) %>%
-  visLayout(randomSeed = .seed)
+  visLayout(randomSeed = .seed, improvedLayout = FALSE)
 ```
 
 Clusters
@@ -830,7 +830,7 @@ group_net = vnet$nodes
 visNetwork(group_net, vnet$edges) %>%
   visInteraction(zoomView = TRUE, dragView = TRUE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE, selectedBy = if(.groups){"group"} else {NULL}) %>%
-  visLayout(randomSeed = .seed)
+  visLayout(randomSeed = .seed, improvedLayout = FALSE)
 ```
 
 ### Groups Plot
