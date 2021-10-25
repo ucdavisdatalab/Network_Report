@@ -251,8 +251,7 @@ Data Types {data-width=600}
   visNodes(shapeProperties = list(useBorderWithImage = FALSE), size = 50) %>%
   visEdges(length = 200, scaling = list(min = 400)) %>%
   visInteraction(zoomView = FALSE) %>%
-  visPhysics(solver = "barnesHut", maxVelocity = 50, minVelocity = 6) %>%
-  visLayout(randomSeed = 2)
+  visIgraphLayout(physics = TRUE, randomSeed = .seed)
 
 .toy_net$sizingPolicy$browser$fill = TRUE
 
