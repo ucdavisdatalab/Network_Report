@@ -78,7 +78,7 @@ edges = data.frame(
 # FALSE to TRUE. In a directed network, the sender and received of a connection
 # are distinct, like a follow on twitter. In contract, and un-directed network
 # treats all connections as mutual, like a friend on facebook. This will have
-# a significant effect on how things are measure in the report, so please
+# a significant effect on how things are measured in the report, so please
 # give thought to what you pick!
 
 sample_net = graph_from_data_frame(edges, vertices = nodes, directed = FALSE)
