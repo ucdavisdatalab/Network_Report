@@ -28,6 +28,10 @@ library(ggplot2)
 # also need RColorBrewer
 
 # options
+
+## report author/ who knit this
+.author = "Jared Joseph"
+
 ## Set a random seed
 .seed = 1337
 
@@ -172,6 +176,7 @@ Welcome! {data-width=400}
 ### Welcome!
 
 Report generated: `r format(Sys.time(), '%B %d, %Y')`
+Knit by: `r paste(.author)`
 
 #### Report Introduction
 
