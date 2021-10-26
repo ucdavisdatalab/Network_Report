@@ -455,7 +455,7 @@ if(is.null(V(rgraph)$group_1)){
   
   net_list[[group_iter]] = visNetwork(overview_net, vnet$edges) %>%
     visInteraction(zoomView = TRUE, dragView = TRUE) %>%
-    visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE, selectedBy = if(.groups){"group"} else {NULL}) %>%
+    visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE, selectedBy = "group") %>%
     visIgraphLayout(physics = TRUE, randomSeed = .seed)
   
   }
