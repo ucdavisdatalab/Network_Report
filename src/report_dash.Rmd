@@ -35,6 +35,9 @@ library(ggplot2)
 ## Set a random seed
 .seed = 1337
 
+## load in network
+rgraph = readRDS("./data/sample_net.rds")
+
 # set color pal
 .pal = RColorBrewer::brewer.pal(8, "Dark2")
 
@@ -70,9 +73,6 @@ opts_knit$set(width=75)
 ```
 
 ```{r data_load, include=FALSE}
-## load in network
-rgraph = readRDS("./data/bis2a_net.rds")
-
 ## is this network directed?
 .directed = is.directed(rgraph)
 ## is this network multiplex?
@@ -270,7 +270,7 @@ Explanation Text
 |:-|:-|
 | Nodes | `r vcount(rgraph)` |
 | Edges | `r ecount(rgraph)` | 
-| Components | `r ifelse(components(.bac_net)$no == 0, 0, paste0("<span style='color:red'><b>", components(.bac_net)$no, "</b></span>"))` | 
+| Components | `r ifelse(components(.bac_net)$no == 1, 1, paste0("<span style='color:red'><b>", components(.bac_net)$no, "</b></span>"))` | 
 | Isolates | `r ifelse(as.numeric(table(degree(.bac_net) == 0)["TRUE"]) == 0, 0, paste0("<span style='color:red'><b>", as.numeric(table(degree(.bac_net) == 0)["TRUE"]), "</b></span>"))` |
 | Directed | `r ifelse(.directed, emo::ji("check"), emo::ji("x"))` |
 | Weighted Edges| `r ifelse(.multiplex, emo::ji("check"), emo::ji("x"))` |
@@ -345,61 +345,138 @@ Centralization is a measure of how unevenly node level metrics are distributed i
 Network Viewer {.tabset}
 --------------------------------------------------------------------------------
 
-### Largest Component Overview
+```{r overview_net_gen, echo=FALSE}
 
-```{r overview_net, echo=FALSE}
-overview_net = vnet$nodes
+# make list for multiple networks if multiple groups
+net_list = list()
 
-overview_net$title = paste0("<table>",
-                              "<tr>",
-                                "<th>Measurement</th>",
-                                "<th>Value</th>",
-                              "</tr>",
-                              "<tr>",
-                                "<td>Node ID </td>",
-                                "<td>", overview_net$id, "</td>",
-                              "</tr>",
-                              if(.groups){paste0(
+# if there are no groups do this
+if(is.null(V(rgraph)$group_1)){
+  
+  overview_net = vnet$nodes
+
+  overview_net$title = paste0("<table>",
                                 "<tr>",
-                                  "<td>Group </td>",
-                                  "<td>", overview_net$group, "</td>",
-                                "</tr>")
+                                  "<th>Measurement</th>",
+                                  "<th>Value</th>",
+                                "</tr>",
+                                "<tr>",
+                                  "<td>Node ID </td>",
+                                  "<td>", overview_net$id, "</td>",
+                                "</tr>",
+                                "<tr>",
+                                  "<td>Total Degree </td>",
+                                  "<td>", round(overview_net$degree, digits = 3), "</td>",
+                                "</tr>",
+                                if(.directed){paste0(
+                                  "<tr>",
+                                    "<td>Total In Degree </td>",
+                                    "<td>", round(overview_net$degree_in, digits = 3), "</td>",
+                                  "</tr>",
+                                  "<tr>",
+                                    "<td>Total Out Degree </td>",
+                                    "<td>", round(overview_net$degree_out, digits = 3), "</td>",
+                                  "</tr>")
+                                },
+                                "<tr>",
+                                  "<td>Mean Geodesic Distance </td>",
+                                  "<td>", round(overview_net$mean_geodist, digits = 3), "</td>",
+                                "</tr>",
+                                "<tr>",
+                                  "<td>Norm Betweenness Centrality </td>",
+                                  "<td>", round(overview_net$norm_betweenness, digits = 3), "</td>",
+                                "</tr>",
+                                "<tr>",
+                                  "<td>Eigenvector Centrality </td>",
+                                  "<td>", round(overview_net$evc, digits = 3), "</td>",
+                                "</tr>",
+                              if(all(!is.na(custom_tooltips))){
+                                apply(data.frame(custom_tooltips, stringsAsFactors = FALSE), 1, FUN = function(trow){paste(trow, collapse = " ")})
                               },
+                              "</table>")
+  
+  net_list[["no_group"]] = visNetwork(overview_net, vnet$edges) %>%
+    visInteraction(zoomView = TRUE, dragView = TRUE) %>%
+    visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE, selectedBy = if(.groups){"group"} else {NULL}) %>%
+    visIgraphLayout(physics = TRUE, randomSeed = .seed)
+  
+} else {
+  # if there are groups do this
+  
+  for(group_iter in vertex_attr_names(rgraph)[grep("group_", vertex_attr_names(rgraph))]){
+  
+  overview_net = vnet$nodes
+  
+  eval(parse(text = paste0("overview_net$group = vnet$nodes$", group_iter)))
+  
+  overview_net$title = paste0("<table>",
                               "<tr>",
-                                "<td>Total Degree </td>",
-                                "<td>", round(overview_net$degree, digits = 3), "</td>",
+                              "<th>Measurement</th>",
+                              "<th>Value</th>",
+                              "</tr>",
+                              "<tr>",
+                              "<td>Node ID </td>",
+                              "<td>", overview_net$id, "</td>",
+                              "</tr>",
+                              "<tr>",
+                                "<td>Group </td>",
+                                "<td>", overview_net$group, "</td>",
+                              "</tr>",
+                              "<tr>",
+                              "<td>Total Degree </td>",
+                              "<td>", round(overview_net$degree, digits = 3), "</td>",
                               "</tr>",
                               if(.directed){paste0(
                                 "<tr>",
-                                  "<td>Total In Degree </td>",
-                                  "<td>", round(overview_net$degree_in, digits = 3), "</td>",
+                                "<td>Total In Degree </td>",
+                                "<td>", round(overview_net$degree_in, digits = 3), "</td>",
                                 "</tr>",
                                 "<tr>",
-                                  "<td>Total Out Degree </td>",
-                                  "<td>", round(overview_net$degree_out, digits = 3), "</td>",
+                                "<td>Total Out Degree </td>",
+                                "<td>", round(overview_net$degree_out, digits = 3), "</td>",
                                 "</tr>")
                               },
                               "<tr>",
-                                "<td>Mean Geodesic Distance </td>",
-                                "<td>", round(overview_net$mean_geodist, digits = 3), "</td>",
+                              "<td>Mean Geodesic Distance </td>",
+                              "<td>", round(overview_net$mean_geodist, digits = 3), "</td>",
                               "</tr>",
                               "<tr>",
-                                "<td>Norm Betweenness Centrality </td>",
-                                "<td>", round(overview_net$norm_betweenness, digits = 3), "</td>",
+                              "<td>Norm Betweenness Centrality </td>",
+                              "<td>", round(overview_net$norm_betweenness, digits = 3), "</td>",
                               "</tr>",
                               "<tr>",
-                                "<td>Eigenvector Centrality </td>",
-                                "<td>", round(overview_net$evc, digits = 3), "</td>",
+                              "<td>Eigenvector Centrality </td>",
+                              "<td>", round(overview_net$evc, digits = 3), "</td>",
                               "</tr>",
-                            if(all(!is.na(custom_tooltips))){
-                              apply(data.frame(custom_tooltips, stringsAsFactors = FALSE), 1, FUN = function(trow){paste(trow, collapse = " ")})
-                            },
-                            "</table>")
+                              if(all(!is.na(custom_tooltips))){
+                                apply(data.frame(custom_tooltips, stringsAsFactors = FALSE), 1, FUN = function(trow){paste(trow, collapse = " ")})
+                              },
+                              "</table>")
+  
+  net_list[[group_iter]] = visNetwork(overview_net, vnet$edges) %>%
+    visInteraction(zoomView = TRUE, dragView = TRUE) %>%
+    visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE, selectedBy = if(.groups){"group"} else {NULL}) %>%
+    visIgraphLayout(physics = TRUE, randomSeed = .seed)
+  
+  }
+  
+  
+}
 
-visNetwork(overview_net, vnet$edges) %>%
-  visInteraction(zoomView = TRUE, dragView = TRUE) %>%
-  visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE, selectedBy = if(.groups){"group"} else {NULL}) %>%
-  visIgraphLayout(physics = TRUE, randomSeed = .seed)
+
+```
+
+```{r overview_net_display, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+.group_iter = 1
+
+for(net in net_list){
+  
+  cat(paste0("### Group: ", .group_iter, "\n"))
+  .group_iter = .group_iter + 1
+  
+  cat(knitr::knit_print(net))
+  
+}
 ```
 
 ### Component Checker
