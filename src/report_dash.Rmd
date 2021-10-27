@@ -26,6 +26,8 @@ library(ggplot2)
 # also need reshape2 package
 # also need ggpubr package
 # also need RColorBrewer
+# also need webshot
+# also oneed to webshot::install_phantomjs()
 
 # options
 
@@ -78,9 +80,14 @@ opts_knit$set(width=75)
 ## is this network multiplex?
 .multiplex = is.weighted(rgraph)
 ## is there a group in the nodes data?
-.groups = (!is.null(V(rgraph)$group) && length(unique(V(rgraph)$group)) > 1)
+.groups = length(vertex_attr_names(rgraph)[grep("group_\\d+$", vertex_attr_names(rgraph))]) > 0
 # if there are groups, set color of nodes
-if(.groups){rgraph = set_vertex_attr(rgraph, "color", value = .pal[as.factor(V(rgraph)$group)])}
+if(.groups){
+  for(group_iter in vertex_attr_names(rgraph)[grep("group_\\d+$", vertex_attr_names(rgraph))]){
+    rgraph = set_vertex_attr(rgraph, paste0(group_iter, "_color"), value = .pal[as.factor(eval(parse(text = paste0("V(rgraph)$", group_iter))))])
+  }
+}
+
 # number of components
 .component_num = components(rgraph)$no
 # save total network
@@ -198,6 +205,7 @@ Welcome! {data-width=400}
 ### Welcome!
 
 Report generated: `r format(Sys.time(), '%B %d, %Y')`
+
 Knit by: `r paste(.author)`
 
 #### Partner Info
@@ -397,17 +405,18 @@ if(is.null(V(rgraph)$group_1)){
   
   net_list[["no_group"]] = visNetwork(overview_net, vnet$edges) %>%
     visInteraction(zoomView = TRUE, dragView = TRUE) %>%
-    visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE, selectedBy = if(.groups){"group"} else {NULL}) %>%
+    visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
     visIgraphLayout(physics = TRUE, randomSeed = .seed)
   
 } else {
   # if there are groups do this
   
-  for(group_iter in vertex_attr_names(rgraph)[grep("group_", vertex_attr_names(rgraph))]){
+  for(group_iter in vertex_attr_names(rgraph)[grep("group_\\d+$", vertex_attr_names(rgraph))]){
   
   overview_net = vnet$nodes
   
   eval(parse(text = paste0("overview_net$group = vnet$nodes$", group_iter)))
+  eval(parse(text = paste0("overview_net$color = vnet$nodes$", group_iter, "_color")))
   
   overview_net$title = paste0("<table>",
                               "<tr>",
@@ -428,11 +437,11 @@ if(is.null(V(rgraph)$group_1)){
                               "</tr>",
                               if(.directed){paste0(
                                 "<tr>",
-                                "<td>Total In Degree </td>",
+                                "<td>In Degree </td>",
                                 "<td>", round(overview_net$degree_in, digits = 3), "</td>",
                                 "</tr>",
                                 "<tr>",
-                                "<td>Total Out Degree </td>",
+                                "<td>Out Degree </td>",
                                 "<td>", round(overview_net$degree_out, digits = 3), "</td>",
                                 "</tr>")
                               },
@@ -459,14 +468,10 @@ if(is.null(V(rgraph)$group_1)){
     visIgraphLayout(physics = TRUE, randomSeed = .seed)
   
   }
-  
-  
 }
-
-
 ```
 
-```{r overview_net_display, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+```{r overview_net_display, echo=FALSE, results='asis'}
 .group_iter = 1
 
 for(net in net_list){
@@ -523,7 +528,6 @@ This network is an un-directed network, meaning all edges are mutual, and has a 
 
 `r if(.directed) {"-->"}`
 
-
 `r if(!.directed) {"<!--"}`
 
 The network on the right has the nodes scaled such that larger nodes have a higher total degree. You can pan and zoom around the network to look at specific areas more closely. The node ID and total degree is displayed below a node. You can also use the drop-down in the upper left to find a specific node; nodes are in alphabetical order.
@@ -565,37 +569,6 @@ Network Viewer
 degree_df = vnet$nodes
 degree_df$value = degree_df$degree ^ 2
 degree_df$color = "#355B85"
-
-# make hover tips
-if(.directed){
-  
-  degree_df$title = paste0("<table>",
-                              "<tr>",
-                                "<th>Measurement</th>",
-                                "<th>Value</th>",
-                              "</tr>",
-                              "<tr>",
-                                "<td>Node ID </td>",
-                                "<td>", overview_net$id, "</td>",
-                              "</tr>",
-                              "<tr>",
-                                "<td>Total Degree </td>",
-                                "<td>", round(overview_net$degree, digits = 3), "</td>",
-                              "</tr>",
-                              if(.directed){paste0(
-                                "<tr>",
-                                  "<td>Total In Degree </td>",
-                                  "<td>", round(overview_net$degree_in, digits = 3), "</td>",
-                                "</tr>",
-                                "<tr>",
-                                  "<td>Total Out Degree </td>",
-                                  "<td>", round(overview_net$degree_out, digits = 3), "</td>",
-                                "</tr>")
-                              },
-                            "</table>")
-  
-}
-
 
 # add color for largest node
 degree_df[which(max(degree_df$degree) == degree_df$degree), "color"] = "#FFBF00"
@@ -879,39 +852,42 @@ One of the most useful aspects of network analysis is the ability to compare how
 #### In This Network
 
 ```{r group_tables, echo=FALSE, message=FALSE, warning=FALSE, results='asis', eval=.groups}
-
-for(group in unique(vnet$nodes$group)){
+for(group_iter in vertex_attr_names(rgraph)[grep("group_\\d+$", vertex_attr_names(rgraph))]){
   
-  cat(paste0("##### Group: ", group))
-  
-  if(.directed){
-    cat(knit_print(skim_without_charts(vnet$nodes[vnet$nodes$group == group,], c("degree", "degree_in", "degree_out", "mean_geodist", "norm_betweenness", "evc")) %>% yank("numeric")))
-  } else {
-    cat(knit_print(skim_without_charts(vnet$nodes[vnet$nodes$group == group,], c("degree", "mean_geodist", "norm_betweenness", "evc")) %>% yank("numeric")))
+  for(membership in unique(vnet$nodes[, group_iter])){
+    
+    cat(paste0("##### ", group_iter, " - Membership: ", membership))
+    
+    if(.directed){
+      cat(knit_print(skim_without_charts(vnet$nodes[vnet$nodes[, group_iter] == membership,], c("degree", "degree_in", "degree_out", "mean_geodist", "norm_betweenness", "evc")) %>% yank("numeric")))
+    } else {
+      cat(knit_print(skim_without_charts(vnet$nodes[vnet$nodes[, group_iter] == membership,], c("degree", "mean_geodist", "norm_betweenness", "evc")) %>% yank("numeric")))
     }
+  }
+}
+```
+
+This network has `r length(vertex_attr_names(rgraph)[grep("group_", vertex_attr_names(rgraph))])` group sets. You can see tables detailing the distribution of their network metrics above. If these group memberships have noticeably different distributions, it may be worth investigating why that is the case. 
+
+Groups Viewer {.tabset}
+--------------------------------------------------------------------------------
+
+```{r group_net, echo=FALSE, eval=.groups, results="asis"}
+.group_iter = 1
+
+for(net in net_list){
+  
+  cat(paste0("### Group: ", .group_iter, "\n"))
+  .group_iter = .group_iter + 1
+  
+  cat(knitr::knit_print(net))
   
 }
 ```
 
-This network has `r length(unique(vnet$nodes$group))` groups. You can see tables detailing the distribution of their network metrics above. If these groups have noticeably different distributions, it may be worth investigating why that is the case. 
-
-Groups Viewer
---------------------------------------------------------------------------------
-
-### Groups Network
-
-```{r group_net, echo=FALSE, eval=.groups}
-group_net = vnet$nodes
-
-visNetwork(group_net, vnet$edges) %>%
-  visInteraction(zoomView = TRUE, dragView = TRUE) %>%
-  visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE, selectedBy = if(.groups){"group"} else {NULL}) %>%
-  visIgraphLayout(physics = TRUE, randomSeed = .seed)
-```
-
 ### Groups Plot
 
-```{r group_plot, echo=FALSE, eval=.groups}
+```{r group_plot, echo=FALSE, eval=FALSE}
 # melt the node attributes
 melt_nodes = reshape2::melt(vnet$nodes)
 # aggregate by group
