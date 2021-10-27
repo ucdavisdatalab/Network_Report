@@ -5,8 +5,13 @@
 # drop your data into the report without additional work. If it does not you
 # will need to do some work to get your data into this expected format.
 
+# The dataframes below will produce examples that fit the expected template. To be clear,
+# you do NOT need to create your dataframes in this R script, you can import them, but
+# you will need to work with them until they match the expected templates. The column
+# names given are EXACT and must be used.
+
 # Additionally, you will need to denote some of the properties of the network
-# at the start of the report document, including a random seed.
+# at the start of the report document inside the setup chunk.
 
 # Setup ####
 
@@ -26,13 +31,15 @@ library(igraph)
 # there is anything you would like to organize the nodes by, this is where it
 # would go. Later on, calculated network metrics will also be stored here.
 
-# N.B. The first column MUST be named "id"
+# N.B. The FIRST column MUST be named "id"
 
 ### Columns
 
-# id:     (REQUIRED) The unique identifier for the node
-# group:  A categorical grouping of nodes
-# OTHER:  Other columns are currently ignored
+# id:       (REQUIRED) The unique identifier for the node
+# group_*:  A categorical grouping of nodes, can have an arbitray number of group columns,
+#           but must be named "group_(number)"
+# OTHER:    Other columns are currently ignored, but can be shown as metadata for nodes in
+#           the report.
 
 nodes = data.frame(
   "id" = c("Samantha Carter", "Alyx Vance", "Jesse Faden", "Ramona Flowers", "Ameiko Kaijitsu", "Paul Atreides", "Gordon Freeman", "Levi Ackerman", "Spike Spiegel", "Edward Elric"),
@@ -52,7 +59,7 @@ nodes = nodes[order(nodes$id), ]
 # the ids from the attribute file, you can start specifying other metadata.
 # You could include the "weight" or value of that tie, the type, or a time stamp.
 
-# N.B. The first column must be named "from" and the second must be named "to"
+# N.B. The FIRST column must be named "from" and the second must be named "to"
 # These values must match the "id" column in the attribute file. Connections
 # originate from the "from" node and go to the "to" node. This is important for
 # directed networks; if your network is un-directed, it does not matter.
