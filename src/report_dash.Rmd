@@ -80,10 +80,10 @@ opts_knit$set(width=75)
 ## is this network multiplex?
 .multiplex = is.weighted(rgraph)
 ## is there a group in the nodes data?
-.groups = length(vertex_attr_names(rgraph)[grep("group_\\d+$", vertex_attr_names(rgraph))]) > 0
+.groups = length(vertex_attr_names(rgraph)[grep("^group_\\d+$", vertex_attr_names(rgraph))]) > 0
 # if there are groups, set color of nodes
 if(.groups){
-  for(group_iter in vertex_attr_names(rgraph)[grep("group_\\d+$", vertex_attr_names(rgraph))]){
+  for(group_iter in vertex_attr_names(rgraph)[grep("^group_\\d+$", vertex_attr_names(rgraph))]){
     rgraph = set_vertex_attr(rgraph, paste0(group_iter, "_color"), value = .pal[as.factor(eval(parse(text = paste0("V(rgraph)$", group_iter))))])
   }
 }
@@ -411,7 +411,7 @@ if(is.null(V(rgraph)$group_1)){
 } else {
   # if there are groups do this
   
-  for(group_iter in vertex_attr_names(rgraph)[grep("group_\\d+$", vertex_attr_names(rgraph))]){
+  for(group_iter in vertex_attr_names(rgraph)[grep("^group_\\d+$", vertex_attr_names(rgraph))]){
   
   overview_net = vnet$nodes
   
@@ -840,6 +840,61 @@ plot(lab_clust, rgraph, edge.width = if(.multiplex){E(rgraph)$weight} else {NULL
 Groups
 ================================================================================
 
+```{r group_plot, echo=FALSE}
+
+group_plots = list()
+
+for(group_iter in vertex_attr_names(rgraph)[grep("^group_\\d+$", vertex_attr_names(rgraph))]){
+  
+  # I'm so sorry for this. It subsets the nodes dataframe to only include the iterative group column and iterative group color column by dropping other groups this iteration
+  group_sub = vnet$nodes[, !(colnames(vnet$nodes) %in% colnames(vnet$nodes)[grep("^group_", colnames(vnet$nodes))][!(colnames(vnet$nodes)[grep("^group_", colnames(vnet$nodes))] %in% colnames(vnet$nodes)[grep(group_iter, colnames(vnet$nodes))])])]
+  
+  iter_melt = reshape2::melt(group_sub)
+  
+  ggplot_iter = do.call(rbind, by(data = iter_melt, INDICES = list(as.factor(iter_melt[, group_iter]), as.factor(iter_melt$variable)), FUN = function(mes){
+    data.frame("group" = mes[, group_iter][1], "variable" = mes$variable[1], "value" = mean(mes$value), "color" = mes[, paste0(group_iter, "_color")][1], stringsAsFactors = FALSE)}))
+  
+  
+  # make plots for each network attribute
+  
+  ## degree
+  degree_bell = ggplot(ggplot_iter[ggplot_iter$variable == "degree",], aes(x=variable, y=value)) +
+    geom_segment(aes(x=variable, xend=variable, y=min(value), yend=max(value)), linetype="dashed", size=0.1) +   # Draw dashed lines
+    geom_point(aes(col=group), size=5) +   # Draw points
+    labs(title="Total Degree", subtitle=NULL, color = "Group") + xlab(NULL) + ylab("Mean Value") +
+    theme_classic(base_size = 12) + theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) + coord_flip() +
+    scale_color_manual(name = "Group", breaks = unique(ggplot_iter$group), values = structure(ggplot_iter[1:length(unique(ggplot_iter$group)), "color"], .Names = ggplot_iter[1:length(unique(ggplot_iter$group)), "group"]))
+  
+  ## mean_geodist
+  gdist_bell = ggplot(ggplot_iter[ggplot_iter$variable == "mean_geodist",], aes(x=variable, y=value)) +
+    geom_segment(aes(x=variable, xend=variable, y=min(value), yend=max(value)), linetype="dashed", size=0.1) +   # Draw dashed lines
+    geom_point(aes(col=group), size=5) +   # Draw points
+    labs(title="Mean Geodesic Distance", subtitle=NULL, color = "Group") + xlab(NULL) + ylab("Mean Value") +
+    theme_classic(base_size = 12) + theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) + coord_flip() +
+    scale_color_manual(name = "Group", breaks = unique(ggplot_iter$group), values = structure(ggplot_iter[1:length(unique(ggplot_iter$group)), "color"], .Names = ggplot_iter[1:length(unique(ggplot_iter$group)), "group"]))
+  
+  ## norm_betweenness
+  bet_bell = ggplot(ggplot_iter[ggplot_iter$variable == "norm_betweenness",], aes(x=variable, y=value)) +
+    geom_segment(aes(x=variable, xend=variable, y=min(value), yend=max(value)), linetype="dashed", size=0.1) +   # Draw dashed lines
+    geom_point(aes(col=group), size=5) +   # Draw points
+    labs(title="Norm Betweenness", subtitle=NULL, color = "Group") + xlab(NULL) + ylab("Mean Value") +
+    theme_classic(base_size = 12) + theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) + coord_flip() +
+    scale_color_manual(name = "Group", breaks = unique(ggplot_iter$group), values = structure(ggplot_iter[1:length(unique(ggplot_iter$group)), "color"], .Names = ggplot_iter[1:length(unique(ggplot_iter$group)), "group"]))
+  
+  ## eigenvector
+  evc_bell = ggplot(ggplot_iter[ggplot_iter$variable == "evc",], aes(x=variable, y=value)) +
+    geom_segment(aes(x=variable, xend=variable, y=min(value), yend=max(value)), linetype="dashed", size=0.1) +   # Draw dashed lines
+    geom_point(aes(col=group), size=5) +   # Draw points
+    labs(title="Eigenvector", subtitle=NULL, color = "Group") + xlab(NULL) + ylab("Mean Value") +
+    theme_classic(base_size = 12) + theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) + coord_flip() +
+    scale_color_manual(name = "Group", breaks = unique(ggplot_iter$group), values = structure(ggplot_iter[1:length(unique(ggplot_iter$group)), "color"], .Names = ggplot_iter[1:length(unique(ggplot_iter$group)), "group"]))
+  
+  # show combined plots
+  group_plots[[group_iter]] = ggpubr::ggarrange(degree_bell, gdist_bell, bet_bell, evc_bell, ncol = 1, nrow = 4)
+  
+}
+```
+
 Groups Text
 --------------------------------------------------------------------------------
 
@@ -852,11 +907,17 @@ One of the most useful aspects of network analysis is the ability to compare how
 #### In This Network
 
 ```{r group_tables, echo=FALSE, message=FALSE, warning=FALSE, results='asis', eval=.groups}
-for(group_iter in vertex_attr_names(rgraph)[grep("group_\\d+$", vertex_attr_names(rgraph))]){
+for(group_iter in vertex_attr_names(rgraph)[grep("^group_\\d+$", vertex_attr_names(rgraph))]){
+  
+  cat(paste0("\n##### ", group_iter, " \n"))
+  
+  plot(group_plots[[group_iter]])
+  
+  cat("\n")
   
   for(membership in unique(vnet$nodes[, group_iter])){
     
-    cat(paste0("##### ", group_iter, " - Membership: ", membership))
+    cat(paste0("\n**", group_iter, " - Membership: ", membership, "**"))
     
     if(.directed){
       cat(knit_print(skim_without_charts(vnet$nodes[vnet$nodes[, group_iter] == membership,], c("degree", "degree_in", "degree_out", "mean_geodist", "norm_betweenness", "evc")) %>% yank("numeric")))
@@ -873,66 +934,14 @@ Groups Viewer {.tabset}
 --------------------------------------------------------------------------------
 
 ```{r group_net, echo=FALSE, eval=.groups, results="asis"}
-.group_iter = 1
-
-for(net in net_list){
+for(i in 1:length(net_list)){
   
-  cat(paste0("### Group: ", .group_iter, "\n"))
-  .group_iter = .group_iter + 1
+  cat(paste0("\n", "### Group ", i, ": Network", "\n"))
   
-  cat(knitr::knit_print(net))
+  cat(knitr::knit_print(net_list[[i]]))
   
 }
 ```
-
-### Groups Plot
-
-```{r group_plot, echo=FALSE, eval=FALSE}
-# melt the node attributes
-melt_nodes = reshape2::melt(vnet$nodes)
-# aggregate by group
-melt_nodes = do.call(rbind, by(data = melt_nodes, INDICES = list(as.factor(melt_nodes$group), as.factor(melt_nodes$variable)), FUN = function(mes){
-  data.frame("group" = mes$group[1], "variable" = mes$variable[1], "value" = mean(mes$value), "color" = mes$color[1], stringsAsFactors = FALSE)
-  }))
-
-# make plots for each network attribute
-
-## degree
-degree_bell = ggplot(melt_nodes[melt_nodes$variable == "degree",], aes(x=variable, y=value)) +
-  geom_segment(aes(x=variable, xend=variable, y=min(value), yend=max(value)), linetype="dashed", size=0.1) +   # Draw dashed lines
-  geom_point(aes(col=group), size=5) +   # Draw points
-  labs(title="Total Degree", subtitle=NULL, color = "Group") + xlab(NULL) + ylab("Mean Value") +
-  theme_classic(base_size = 12) + theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) + coord_flip() +
-  scale_color_manual(name = "Group", breaks = unique(melt_nodes$group), values = structure(melt_nodes[1:length(unique(melt_nodes$group)), "color"], .Names = melt_nodes[1:length(unique(melt_nodes$group)), "group"]))
-
-## mean_geodist
-gdist_bell = ggplot(melt_nodes[melt_nodes$variable == "mean_geodist",], aes(x=variable, y=value)) +
-  geom_segment(aes(x=variable, xend=variable, y=min(value), yend=max(value)), linetype="dashed", size=0.1) +   # Draw dashed lines
-  geom_point(aes(col=group), size=5) +   # Draw points
-  labs(title="Mean Geodesic Distance", subtitle=NULL, color = "Group") + xlab(NULL) + ylab("Mean Value") +
-  theme_classic(base_size = 12) + theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) + coord_flip() +
-  scale_color_manual(name = "Group", breaks = unique(melt_nodes$group), values = structure(melt_nodes[1:length(unique(melt_nodes$group)), "color"], .Names = melt_nodes[1:length(unique(melt_nodes$group)), "group"]))
-
-## norm_betweenness
-bet_bell = ggplot(melt_nodes[melt_nodes$variable == "norm_betweenness",], aes(x=variable, y=value)) +
-  geom_segment(aes(x=variable, xend=variable, y=min(value), yend=max(value)), linetype="dashed", size=0.1) +   # Draw dashed lines
-  geom_point(aes(col=group), size=5) +   # Draw points
-  labs(title="Norm Betweenness", subtitle=NULL, color = "Group") + xlab(NULL) + ylab("Mean Value") +
-  theme_classic(base_size = 12) + theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) + coord_flip() +
-  scale_color_manual(name = "Group", breaks = unique(melt_nodes$group), values = structure(melt_nodes[1:length(unique(melt_nodes$group)), "color"], .Names = melt_nodes[1:length(unique(melt_nodes$group)), "group"]))
-
-## eigenvector
-evc_bell = ggplot(melt_nodes[melt_nodes$variable == "evc",], aes(x=variable, y=value)) +
-  geom_segment(aes(x=variable, xend=variable, y=min(value), yend=max(value)), linetype="dashed", size=0.1) +   # Draw dashed lines
-  geom_point(aes(col=group), size=5) +   # Draw points
-  labs(title="Eigenvector", subtitle=NULL, color = "Group") + xlab(NULL) + ylab("Mean Value") +
-  theme_classic(base_size = 12) + theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) + coord_flip() +
-  scale_color_manual(name = "Group", breaks = unique(melt_nodes$group), values = structure(melt_nodes[1:length(unique(melt_nodes$group)), "color"], .Names = melt_nodes[1:length(unique(melt_nodes$group)), "group"]))
-
-# show combined plots
-ggpubr::ggarrange(degree_bell, gdist_bell, bet_bell, evc_bell, ncol = 1, nrow = 4)
-```
-
 
 `r if(!.groups) {"-->"}`
 
