@@ -5,8 +5,13 @@
 # drop your data into the report without additional work. If it does not you
 # will need to do some work to get your data into this expected format.
 
+# The dataframes below will produce examples that fit the expected template. To 
+# be clear, you do NOT need to create your dataframes in this R script, you can 
+# import them, but you will need to work with them until they match the expected 
+# templates. The column names given are EXACT and must be used.
+
 # Additionally, you will need to denote some of the properties of the network
-# at the start of the report document, including a random seed.
+# at the start of the report document inside the setup chunk.
 
 # Setup ####
 
@@ -17,7 +22,7 @@ library(igraph)
 # Networks require two data files: 1) a file to denote the things in a network 
 # (nodes), and 2) a file to denote the connections in the network (edges).
 
-## Synthetic attributes (nodes) dataframe ####
+## Attributes (nodes) dataframe ####
 
 # An attributes file contains all the information about individual nodes in the
 # network. This includes a unique identifier, plus anything else you know about
@@ -26,17 +31,21 @@ library(igraph)
 # there is anything you would like to organize the nodes by, this is where it
 # would go. Later on, calculated network metrics will also be stored here.
 
-# N.B. The first column MUST be named "id"
+# N.B. The FIRST column MUST be named "id"
 
 ### Columns
 
-# id:     (REQUIRED) The unique identifier for the node
-# group:  A categorical grouping of nodes
-# OTHER:  Other columns are currently ignored
+# id:       (REQUIRED) The unique identifier for the node
+# group_*:  A categorical grouping of nodes, can have an arbitrary number of 
+#           group columns, but must be named "group_(number)"
+# OTHER:    Other columns are currently ignored, but can be shown as metadata 
+#           for nodes in the report by setting them in the `setup` chunk of the
+#           report RMD file.
 
 nodes = data.frame(
   "id" = c("Samantha Carter", "Alyx Vance", "Jesse Faden", "Ramona Flowers", "Ameiko Kaijitsu", "Paul Atreides", "Gordon Freeman", "Levi Ackerman", "Spike Spiegel", "Edward Elric"),
-  "group" = c("A", "B", "C", "A", "B", "C", "A", "B", "B", "A"),
+  "group_1" = c("A", "B", "C", "A", "B", "C", "A", "B", "B", "A"),
+  "group_2" = c("X", "Y", "Z", "X", "Y", "Z", "X", "Y", "Z", "X"),
   "age" = c(41, 24, 30, 24, 31, 33, 27, 33, 27, 18),
   "hair_color" = c("Blonde", "Black", "Red", "Varies", "Black", "Black", "Brown", "Black", "Green", "Blonde"),
   stringsAsFactors = FALSE)
@@ -44,14 +53,14 @@ nodes = data.frame(
 # sort alphabetically for easier navigation later
 nodes = nodes[order(nodes$id), ]
 
-## Synthetic edgelist (edges) ####
+## Edgelist (edges) ####
 
 # An edgelist file contains all information of how nodes are connected or
 # related. After adding information on the sender and receiver of ties using
 # the ids from the attribute file, you can start specifying other metadata.
 # You could include the "weight" or value of that tie, the type, or a time stamp.
 
-# N.B. The first column must be named "from" and the second must be named "to"
+# N.B. The FIRST column must be named "from" and the second must be named "to"
 # These values must match the "id" column in the attribute file. Connections
 # originate from the "from" node and go to the "to" node. This is important for
 # directed networks; if your network is un-directed, it does not matter.

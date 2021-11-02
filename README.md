@@ -4,9 +4,9 @@ This repo hosts code for the DataLab network report. The network report provides
 
 The intended workflow for this report is as follows:
 
-1. Provide the network handout to research partners (WIP).
-2. Raw data is provided to DataLab undergraduate interns, who use `src/data_template.R` to format the data.
-3. The formatted data is run through `src/report_dash.rmd` to create the report.
+1. Provide the network handout to research partners, available in `src/researcher_handout.Rmd`.
+2. Raw data is provided to DataLab undergraduate interns, who use `src/data_template.R` as an example of how to format the data.
+3. The formatted data is run through `src/report_dash.Rmd` to create the report.
 4. The research partners meet with the undergraduate intern and DataLab staff to discuss the report and future directions.
 
 # Data and Formatting
