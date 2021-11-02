@@ -840,7 +840,7 @@ plot(lab_clust, rgraph, edge.width = if(.multiplex){E(rgraph)$weight} else {NULL
 Groups
 ================================================================================
 
-```{r group_plot, echo=FALSE}
+```{r group_plot, echo=FALSE, eval=.groups}
 
 group_plots = list()
 
