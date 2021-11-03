@@ -38,7 +38,7 @@ library(ggplot2)
 .seed = 1337
 
 ## load in network
-rgraph = readRDS("./data/sample_net.rds")
+rgraph = readRDS("./data/my_bis2a_net.rds")
 
 # set color pal
 .pal = RColorBrewer::brewer.pal(8, "Dark2")
@@ -47,11 +47,11 @@ rgraph = readRDS("./data/sample_net.rds")
 # the format should be a named list, with the title as the name.
 # for example c("Title of Value" = "Column name in dataframe")
 
-#custom_tooltips = list("Question" = "text", "Type" = "type")
+custom_tooltips = list("Question" = "text", "Concept" = "group_1", "Competency" = "group_2")
 
 # if you do not have any custom data, please include this
 
-custom_tooltips = NA
+#custom_tooltips = NA
 
 # Parter Info
 
@@ -141,7 +141,7 @@ vnet$edges$width = if(.multiplex){E(rgraph)$weight} else {NULL}
 # custom tooltips
 ## deal with custom tooltips if any set
 
-if(!is.na(custom_tooltips)){
+if(!any(is.na(custom_tooltips))){
   
   ## take values from data
 custom_tooltips = lapply(seq_along(custom_tooltips), FUN = function(i){
@@ -890,7 +890,7 @@ for(group_iter in vertex_attr_names(rgraph)[grep("^group_\\d+$", vertex_attr_nam
     scale_color_manual(name = "Group", breaks = unique(ggplot_iter$group), values = structure(ggplot_iter[1:length(unique(ggplot_iter$group)), "color"], .Names = ggplot_iter[1:length(unique(ggplot_iter$group)), "group"]))
   
   # show combined plots
-  group_plots[[group_iter]] = ggpubr::ggarrange(degree_bell, gdist_bell, bet_bell, evc_bell, ncol = 1, nrow = 4)
+  group_plots[[group_iter]] = ggpubr::ggarrange(degree_bell, gdist_bell, bet_bell, evc_bell, ncol = 1, nrow = 4, legend = "right", common.legend = TRUE)
   
 }
 ```
