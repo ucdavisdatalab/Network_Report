@@ -139,6 +139,8 @@ rgraph = set_vertex_attr(rgraph, "evc", value = evcent(rgraph, directed = .direc
 vnet = visNetwork::toVisNetworkData(rgraph)
 # add edge weights
 vnet$edges$width = if(.multiplex){E(rgraph)$weight} else {NULL}
+# add edge arrows if directed
+if(.directed){vnet$edges$arrows = "to"}
 
 # custom tooltips
 ## deal with custom tooltips if any set
@@ -907,9 +909,8 @@ for(group_iter in vertex_attr_names(rgraph)[grep("^group_\\d+$", vertex_attr_nam
   if(!is.dag(rgraph)){
     group_plots[[group_iter]] = ggpubr::ggarrange(degree_bell, gdist_bell, bet_bell, evc_bell, ncol = 1, nrow = 4, legend = "right", common.legend = TRUE)
   } else {
-    group_plots[[group_iter]] = ggpubr::ggarrange(degree_bell, gdist_bell, bet_bell, ncol = 1, nrow = 4, legend = "right", common.legend = TRUE)
+    group_plots[[group_iter]] = ggpubr::ggarrange(degree_bell, gdist_bell, bet_bell, ncol = 1, nrow = 3, legend = "right", common.legend = TRUE)
       }
-  
   
 }
 ```
