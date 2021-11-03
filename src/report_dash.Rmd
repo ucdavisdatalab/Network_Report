@@ -47,11 +47,11 @@ rgraph = readRDS("./data/my_bis2a_net.rds")
 # the format should be a named list, with the title as the name.
 # for example c("Title of Value" = "Column name in dataframe")
 
-#custom_tooltips = list("Question" = "text", "Concept" = "group_1", "Competency" = "group_2")
+custom_tooltips = list("Question" = "text", "Concept" = "group_1", "Competency" = "group_2")
 
 # if you do not have any custom data, please include this
 
-custom_tooltips = NA
+#custom_tooltips = NA
 
 # Parter Info
 
