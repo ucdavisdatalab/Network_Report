@@ -524,8 +524,12 @@ Degree count can be affected if the network is un-directed or directed; this net
 
 ```{r degree_skim, echo=FALSE}
 skim_without_charts(vnet$nodes$degree) %>% yank("numeric")
+
 if(.directed){
   skim_without_charts(vnet$nodes$degree_in) %>% yank("numeric")
+}
+
+if(.directed){
   skim_without_charts(vnet$nodes$degree_out) %>% yank("numeric")
 }
 ```
@@ -555,17 +559,17 @@ ggplot(data = vnet$nodes, aes(x = degree)) +
   xlab("Total Degree") + labs(title = "Node Total Degree")
 
 if(.directed){
-  
   ggplot(data = vnet$nodes, aes(x = degree_in)) +
   geom_histogram() +
   theme_minimal() +
   xlab("In Degree") + labs(title = "Node In Degree")
-  
+}
+
+if(.directed){
   ggplot(data = vnet$nodes, aes(x = degree_out)) +
   geom_histogram() +
   theme_minimal() +
   xlab("Out Degree") + labs(title = "Node Out Degree")
-  
 }
 ```
 
