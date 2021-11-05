@@ -15,36 +15,24 @@
 
 # data in/out ####
 
-bis = read.csv("data/LG Network Map - Current Draft(1).csv", header = TRUE, stringsAsFactors = FALSE)[-1,]
+nodes = read.csv("data/Node_Attributes_For_Jared_V2.csv", header = TRUE, stringsAsFactors = FALSE)
+edges = read.csv("data/Edge_List_Template_V2.csv", header = TRUE, stringsAsFactors = FALSE)
 
 # data prep ####
 
-## split into nodes and edges ####
+nodes = nodes[, c(2,1,3,4)]
+colnames(nodes) = c("id", "text", "group_1", "group_2")
 
-# split nodes off
-nodes = bis[bis$Shape.Library != "", ]
-# and clean
-nodes = data.frame("id" = trimws(paste0("node_", as.character(nodes$Id))),
-                  "text" = substring(nodes$Text.Area.1,  16, 99999),
-                  "text_id" = substring(nodes$Text.Area.1,  1, 14),
-                  "type" = nodes$Name,
-                  stringsAsFactors = FALSE)
+edges = edges[, c(2,4,1,3)]
+colnames(edges) = c("from", "to", "from_text", "to_text")
 
-# split edges off
-edges = bis[bis$Source.Arrow != "",]
-# and clean
-edges = data.frame("from" = paste0("node_", as.character(edges$Line.Source)),
-                  "to" = paste0("node_", as.character(edges$Line.Destination)),
-                  #"weight" = NA,
-                  "id" = edges$Id,
-                  "type" = edges$Name,
-                  stringsAsFactors = FALSE)
+# make net
 
-sample_net = igraph::graph_from_data_frame(edges, vertices = nodes, directed = FALSE)
+sample_net = igraph::graph_from_data_frame(edges, vertices = nodes, directed = TRUE)
 
 # save ####
 
 # save out the network as a R data file.
-saveRDS(sample_net, "./data/bis2a_net.rds")
+saveRDS(sample_net, "./data/my_bis2a_net.rds")
 
 
