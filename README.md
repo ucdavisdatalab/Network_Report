@@ -1,6 +1,12 @@
 # Overview
 
-This repo hosts code for the DataLab network report. The network report provides an introductory examination of network datasets, with a focus on determining future applicability and directions for further network analysis. The report contains sections which describe general information about networks and the metrics calculated, the metrics in the context of the specific network that was used to create the report, and matching interactive visualizations. You can see an example report by looking at the github pages for this repo.
+This repo hosts code for the DataLab network report. The network report provides an introductory examination of network datasets, with a focus on determining future applicability and directions for further network analysis. The report contains sections which describe general information about networks and the metrics calculated, the metrics in the context of the specific network that was used to create the report, and matching interactive visualizations. [You can see an example report by looking at the github pages for this repo](https://ucdavisdatalab.github.io/Network_Report/report_dash.html).
+
+The metrics covered by the report include both network and node level measures. For the network as a whole we include the number of nodes (entities) and edges (connections), as well as the number of disconnected groups (called components), and lone nodes (called isolates). We also calculated the density of the network, a measure of how interconnected it is, and the diameter. For node level metrics, we provide and explain the degree, betweenness, and eigenvector centrality scores, along with the mean geodesic distances. Each of these is a different way to determine the importance or centrality of a specific node in the network. Finally, the report provides a way to compare and contrast known groups in the network, as well as run clustering algorithms to identify groups via unsupervised methods.
+
+Supplemental to the Network Report, we also created an onboarding document for researchers, to help them decide if a network approach will be useful for their project. It details what network analysis can do, when it is useful, and what required data components need to be prepared. 
+
+# Workflow
 
 The intended workflow for this report is as follows:
 
